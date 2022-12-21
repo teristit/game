@@ -28,10 +28,16 @@ def load_image(name, colorkey=None):
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
+        self.pos = tile_width * pos_x + 15, tile_height * pos_y + 5
         self.image = tile_images[tile_type]
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
+
+        def update(self, x, y):
+            pos_x, pos_y = x, y
+            self.pos = pos_x, pos_y
+            self.rect = self.image.get_rect().move(pos_x, pos_y)
 
 
 class Player(pygame.sprite.Sprite):
@@ -64,26 +70,27 @@ def generate_level(level):
     return new_player, x, y
 
 
-
 def move(player, vector):
     x, y = player.pos
     x, y = x, y
-    if vector == 'LEFT' and level[(y + 39) // tile_width][x // tile_width - 1] == '.':
-        player.update(x - 1 * tile_width, y)
-    elif vector == 'RIGHT' and level[(y + 39) // tile_width][x // tile_width + 1] == '.':
-        print(21)
-        player.update(x + 1 * tile_width, y)
-    elif vector == 'UP' and level[y // tile_width - 1][x // tile_width] == '.':
+    if vector == 'LEFT' and level[(y + 39) // tile_width][(x // tile_width - 1) % 19] == '.':
+        player.update((x - 1 * tile_width) % (19 * tile_width), y)
+    elif vector == 'RIGHT' and level[(y + 39) // tile_width][(x // tile_width + 1) % 19] == '.':
+        player.update((x + 1 * tile_width) % (tile_width * 19), y)
+    elif vector == 'UP' and level[y // tile_width - 1][(x // tile_width) % 19] == '.':
         player.update(x, y - 1 * tile_width)
-        if vector == 'UP' and level[y // tile_width - 2][x // tile_width] == '.':
+        if vector == 'UP' and level[y // tile_width - 2][(x // tile_width) % 19] == '.':
             player.update(x, y - 2 * tile_width - 30)
-    elif vector == 'DOWN' and level[(y - 10) // tile_width + 1][x // tile_width] == '.':
-        player.update(x, y + 1 * tile_width - 15)
+    elif vector == 'DOWN':
+        flag = True
+        while flag:
+            flag = move(player, 'GRAVITY')
     elif vector == 'GRAVITY':
-        if level[(y - 10) // tile_width + 1][x // tile_width] == '.':
+        if level[(y - 10) // tile_width + 1][(x // tile_width) % 19] == '.':
             player.update(x, y + 1)
-        else:
             return True
+        else:
+            return False
 
 
 def terminate():
@@ -93,7 +100,7 @@ def terminate():
 
 if __name__ == '__main__':
     pygame.init()
-    size = width, height = 800, 800
+    size = width, height = 1500, 800
     screen = pygame.display.set_mode(size)
     clock = pygame.time.Clock()
     all_sprites = pygame.sprite.Group()
@@ -101,7 +108,7 @@ if __name__ == '__main__':
     player_group = pygame.sprite.Group()
     tile_width = 50
     tile_height = 50
-    FPS = 100
+    FPS = 150
 
     tiles = []
     player_image = load_image('mar.png')
@@ -125,7 +132,7 @@ if __name__ == '__main__':
                     move(player, 'RIGHT')
 
                 if event.key == pygame.K_UP:
-                    if move(player, 'GRAVITY'):
+                    if not move(player, 'GRAVITY'):
                         move(player, 'UP')
 
                 if event.key == pygame.K_DOWN:
