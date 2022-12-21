@@ -64,22 +64,26 @@ def generate_level(level):
     return new_player, x, y
 
 
+
 def move(player, vector):
     x, y = player.pos
     x, y = x, y
-    if vector == 'LEFT' and level[y // tile_width][x // tile_width - 1] == '.':
+    if vector == 'LEFT' and level[(y + 39) // tile_width][x // tile_width - 1] == '.':
         player.update(x - 1 * tile_width, y)
-    elif vector == 'RIGHT' and level[y // tile_width][x // tile_width + 1] == '.':
+    elif vector == 'RIGHT' and level[(y + 39) // tile_width][x // tile_width + 1] == '.':
         print(21)
         player.update(x + 1 * tile_width, y)
     elif vector == 'UP' and level[y // tile_width - 1][x // tile_width] == '.':
         player.update(x, y - 1 * tile_width)
         if vector == 'UP' and level[y // tile_width - 2][x // tile_width] == '.':
-            player.update(x, y - 2 * tile_width)
-    elif vector == 'DOWN' and level[y // tile_width + 1][x // tile_width] == '.':
-        player.update(x, y + 1 * tile_width)
-    elif vector == 'GRAVITY' and level[y // tile_width + 1][x // tile_width] == '.':
-        player.update(x, y + 1)
+            player.update(x, y - 2 * tile_width - 30)
+    elif vector == 'DOWN' and level[(y - 10) // tile_width + 1][x // tile_width] == '.':
+        player.update(x, y + 1 * tile_width - 15)
+    elif vector == 'GRAVITY':
+        if level[(y - 10) // tile_width + 1][x // tile_width] == '.':
+            player.update(x, y + 1)
+        else:
+            return True
 
 
 def terminate():
@@ -97,7 +101,7 @@ if __name__ == '__main__':
     player_group = pygame.sprite.Group()
     tile_width = 50
     tile_height = 50
-    FPS = 50
+    FPS = 100
 
     tiles = []
     player_image = load_image('mar.png')
@@ -114,18 +118,15 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.KEYDOWN:
-                print('trye')
                 if event.key == pygame.K_LEFT:
-                    print('LEFT')
                     move(player, 'LEFT')
 
                 if event.key == pygame.K_RIGHT:
-                    print('RIGHT')
                     move(player, 'RIGHT')
 
                 if event.key == pygame.K_UP:
-                    print('UP')
-                    move(player, 'UP')
+                    if move(player, 'GRAVITY'):
+                        move(player, 'UP')
 
                 if event.key == pygame.K_DOWN:
                     move(player, 'DOWN')
