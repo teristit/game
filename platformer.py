@@ -28,16 +28,17 @@ def load_image(name, colorkey=None):
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
+        self.d = -15
         self.pos = tile_width * pos_x + 15, tile_height * pos_y + 5
         self.image = tile_images[tile_type]
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
 
-        def update(self, x, y):
-            pos_x, pos_y = x, y
-            self.pos = pos_x, pos_y
-            self.rect = self.image.get_rect().move(pos_x, pos_y)
+    def update(self, d):
+        self.d += int(d)
+        print(self.pos[0], self.d)
+        self.rect = self.image.get_rect().move(self.pos[0] + self.d, self.pos[1] - 5)
 
 
 class Player(pygame.sprite.Sprite):
@@ -57,26 +58,29 @@ class Player(pygame.sprite.Sprite):
 
 def generate_level(level):
     new_player, x, y = None, None, None
+    field = []
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
-                Tile('empty', x, y)
+                field.append(Tile('empty', x, y))
             elif level[y][x] == '#':
-                Tile('wall', x, y)
+                field.append(Tile('wall', x, y))
             elif level[y][x] == '@':
-                Tile('wall', x, y)
+                field.append(Tile('wall', x, y))
     # вернем игрока, а также размер поля в клетках
-    new_player = Player(0, 5)
-    return new_player, x, y
+    new_player = Player(10, 5)
+    return new_player, field, x, y
 
 
 def move(player, vector):
     x, y = player.pos
     x, y = x, y
     if vector == 'LEFT' and level[(y + 39) // tile_width][(x // tile_width - 1) % 19] == '.':
-        player.update((x - 1 * tile_width) % (19 * tile_width), y)
+        for i in field:
+            i.update(-50)
     elif vector == 'RIGHT' and level[(y + 39) // tile_width][(x // tile_width + 1) % 19] == '.':
-        player.update((x + 1 * tile_width) % (tile_width * 19), y)
+        for i in field:
+            i.update(50)
     elif vector == 'UP' and level[y // tile_width - 1][(x // tile_width) % 19] == '.':
         player.update(x, y - 1 * tile_width)
         if vector == 'UP' and level[y // tile_width - 2][(x // tile_width) % 19] == '.':
@@ -109,6 +113,8 @@ if __name__ == '__main__':
     tile_width = 50
     tile_height = 50
     FPS = 150
+    music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
+    pygame.mixer_music.play()
 
     tiles = []
     player_image = load_image('mar.png')
@@ -118,7 +124,7 @@ if __name__ == '__main__':
     }
 
     level = load_level('level_1.txt')
-    player, level_x, level_y = generate_level(level)
+    player,field, level_x, level_y = generate_level(level)
 
     while True:
         for event in pygame.event.get():
