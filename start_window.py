@@ -50,22 +50,27 @@ class StartWindow:
                     button_y <= y <= button_y + button_h):
                 # переход в окно игры 1
                 if i == 1:
+                    return 1
                     print(4)
                 # переход в окно игры 2
                 elif i == 2:
+                    return 2
                     print(3)
                     sys.exit()
                 # переход в окно игры 3
                 elif i == 3:
+                    return 3
                     print(2)
                 else:
                     print(1)
 
 
-if __name__ == '__main__':
+size = width, height = 1000, 800
+
+
+def run():
     pygame.init()
     pygame.display.set_caption('Начальная заставка')
-    size = width, height = 1000, 800
     screen = pygame.display.set_mode(size)
     screen.fill((255, 255, 255))
     start_window = StartWindow()
@@ -78,9 +83,9 @@ if __name__ == '__main__':
                 runGame = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
-                start_window.get_click(mouse_pos)
-                if runGame == False:
-                    break
+                n = start_window.get_click(mouse_pos)
+                if n:
+                    return n
             background = start_window.load_image('background.jpg')
             screen.blit(background, (0, 0))
             start_window.draw(screen)

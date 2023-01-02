@@ -102,29 +102,29 @@ def terminate():
     sys.exit()
 
 
-if __name__ == '__main__':
+size = width, height = 1500, 800
+all_sprites = pygame.sprite.Group()
+tiles_group = pygame.sprite.Group()
+player_group = pygame.sprite.Group()
+tile_width = 50
+tile_height = 50
+tiles = []
+player_image = load_image('mar.png')
+tile_images = {
+    'wall': load_image('box.png'),
+    'empty': load_image('grass.png')
+}
+level = load_level('level_1.txt')
+player, field, level_x, level_y = generate_level(level)
+
+
+def run():
     pygame.init()
-    size = width, height = 1500, 800
     screen = pygame.display.set_mode(size)
     clock = pygame.time.Clock()
-    all_sprites = pygame.sprite.Group()
-    tiles_group = pygame.sprite.Group()
-    player_group = pygame.sprite.Group()
-    tile_width = 50
-    tile_height = 50
     FPS = 150
     music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
     pygame.mixer_music.play()
-
-    tiles = []
-    player_image = load_image('mar.png')
-    tile_images = {
-        'wall': load_image('box.png'),
-        'empty': load_image('grass.png')
-    }
-
-    level = load_level('level_1.txt')
-    player,field, level_x, level_y = generate_level(level)
 
     while True:
         for event in pygame.event.get():
