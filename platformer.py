@@ -28,15 +28,14 @@ def load_image(name, colorkey=None):
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
-        self.pos = tile_width * pos_x, tile_height * pos_y + 5
+        self.pos = tile_width * pos_x, tile_height * pos_y
         self.image = tile_images[tile_type]
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect().move(self.pos[0], self.pos[1] - 5)
+        self.rect = self.image.get_rect().move(self.pos[0], self.pos[1])
 
     def update(self, d):
-        print(self.pos[0])
         self.pos = self.pos[0] + d, self.pos[1]
-        self.rect = self.image.get_rect().move(self.pos[0] + 15, self.pos[1])
+        self.rect = self.image.get_rect().move(self.pos[0], self.pos[1])
 
 
 class Player(pygame.sprite.Sprite):
@@ -73,10 +72,13 @@ def generate_level(level):
 def move(player, vector):
     x, y = player.pos
     x, y = x, y
+    flagh = False
     if vector == 'LEFT' and level[(y + 39) // tile_width][(x // tile_width + delta)] == '.':
+        flagh = True
         for i in field:
             i.update(-50)
     elif vector == 'RIGHT' and level[(y + 39) // tile_width][(x // tile_width + delta)] == '.':
+        flagh = True
         for i in field:
             i.update(50)
     elif vector == 'UP' and level[y // tile_width - 1][(x // tile_width + delta)] == '.':
@@ -93,6 +95,7 @@ def move(player, vector):
             return True
         else:
             return False
+    return flagh
 
 
 def terminate():
@@ -123,7 +126,7 @@ def run():
     clock = pygame.time.Clock()
     FPS = 150
     music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
-    pygame.mixer_music.play()
+#    pygame.mixer_music.play()
     global delta
 
     while True:
@@ -132,12 +135,18 @@ def run():
                 terminate()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
+                    print('aaaa')
                     delta -= 1
-                    move(player, 'RIGHT')
+                    if not move(player, 'RIGHT'):
+                        delta += 1
+
 
                 if event.key == pygame.K_RIGHT:
+                    print('uuuuu')
                     delta += 1
-                    move(player, 'LEFT')
+                    if not move(player, 'LEFT'):
+                        delta -= 1
+
 
 
                 if event.key == pygame.K_UP:
@@ -151,7 +160,5 @@ def run():
         screen.fill((255, 255, 255))
         tiles_group.draw(screen)
         player_group.draw(screen)
-        # изменяем ракурс камеры
-        # обновляем положение всех спрайтов
         pygame.display.flip()
         clock.tick(FPS)
