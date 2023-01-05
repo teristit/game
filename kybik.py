@@ -1,11 +1,12 @@
 import random
+
 import pygame
 
 pygame.init()
 display_width = 900
 display_height = 600
 display = pygame.display.set_mode((display_width, display_height))
-pygame.display.set_caption("КУУУУБИК")
+pygame.display.set_caption("КУУУУУБИК")
 
 # PlayerCharacher
 x = 80
@@ -20,6 +21,25 @@ score = 0
 above_cactus = False
 
 
+class Cactus:
+    def __init__(self, x, y, width, height, speed):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.speed = speed
+
+    def draw(self):
+        if self.x >= -self.width:
+            pygame.draw.rect(display, (0, 255, 0), (self.x, self.y, self.width, self.height))
+            self.x -= self.speed
+            return True
+        else:
+            self.x = display_width + 50 + random.randrange(-80, 60)
+            return False
+
+    def return_self(self, radius):
+        self.x = radius
 
 
 class Button:
@@ -61,6 +81,30 @@ CactusY = display_height / 2 + 140
 clock = pygame.time.Clock()
 
 
+def Main():
+    global MakeJump, score
+    CactusArr = []
+    score = 0
+
+    working = True
+    while working:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        mouse_click = pygame.mouse.get_pressed()
+        scoreText = font.render("БАЛЫ ЗА ОГЕ: " + str(score), 1, (0, 0, 0))
+        if mouse_click[0]:
+            MakeJump = True
+
+        display.fill((255, 255, 255))
+        pygame.draw.rect(display, (255, 0, 0), (x, y, width, height))
+        pygame.draw.rect(display, (0, 255, 0), (0, display_height - 80, display_width, 80))
+        display.blit(scoreText, (0, 0))
+        pygame.display.update()
+        clock.tick(80)
+
+
 
 
 
@@ -77,9 +121,12 @@ def Menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
 
-        info = font.render("КУУУУУУБИК :)", 1, (0, 0, 0))
+        info = font.render("Jumping Cube :)", 1, (0, 0, 0))
         keys = pygame.key.get_pressed()
 
+        if play_button.action == True:
+            working = False
+            Main()
 
         display.fill((255, 255, 255))
         display.blit(info, (display_width / 2 - 200, 20))
