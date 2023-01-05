@@ -28,17 +28,15 @@ def load_image(name, colorkey=None):
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
-        self.d = -15
-        self.pos = tile_width * pos_x + 15, tile_height * pos_y + 5
+        self.pos = tile_width * pos_x, tile_height * pos_y + 5
         self.image = tile_images[tile_type]
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x, tile_height * pos_y)
+        self.rect = self.image.get_rect().move(self.pos[0], self.pos[1] - 5)
 
     def update(self, d):
-        self.d += int(d)
-        print(self.pos[0], self.d)
-        self.rect = self.image.get_rect().move(self.pos[0] + self.d, self.pos[1] - 5)
+        print(self.pos[0])
+        self.pos = self.pos[0] + d, self.pos[1]
+        self.rect = self.image.get_rect().move(self.pos[0] + 15, self.pos[1])
 
 
 class Player(pygame.sprite.Sprite):
@@ -75,22 +73,22 @@ def generate_level(level):
 def move(player, vector):
     x, y = player.pos
     x, y = x, y
-    if vector == 'LEFT' and level[(y + 39) // tile_width][(x // tile_width - 1) % 19] == '.':
+    if vector == 'LEFT' and level[(y + 39) // tile_width][(x // tile_width + delta)] == '.':
         for i in field:
             i.update(-50)
-    elif vector == 'RIGHT' and level[(y + 39) // tile_width][(x // tile_width + 1) % 19] == '.':
+    elif vector == 'RIGHT' and level[(y + 39) // tile_width][(x // tile_width + delta)] == '.':
         for i in field:
             i.update(50)
-    elif vector == 'UP' and level[y // tile_width - 1][(x // tile_width) % 19] == '.':
+    elif vector == 'UP' and level[y // tile_width - 1][(x // tile_width + delta)] == '.':
         player.update(x, y - 1 * tile_width)
-        if vector == 'UP' and level[y // tile_width - 2][(x // tile_width) % 19] == '.':
+        if vector == 'UP' and level[y // tile_width - 2][(x // tile_width + delta)] == '.':
             player.update(x, y - 2 * tile_width - 30)
     elif vector == 'DOWN':
         flag = True
         while flag:
             flag = move(player, 'GRAVITY')
     elif vector == 'GRAVITY':
-        if level[(y - 10) // tile_width + 1][(x // tile_width) % 19] == '.':
+        if level[(y - 10) // tile_width + 1][(x // tile_width + delta)] == '.':
             player.update(x, y + 1)
             return True
         else:
@@ -116,6 +114,7 @@ tile_images = {
 }
 level = load_level('level_1.txt')
 player, field, level_x, level_y = generate_level(level)
+delta = 0
 
 
 def run():
@@ -125,6 +124,7 @@ def run():
     FPS = 150
     music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
     pygame.mixer_music.play()
+    global delta
 
     while True:
         for event in pygame.event.get():
@@ -132,10 +132,13 @@ def run():
                 terminate()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    move(player, 'LEFT')
+                    delta -= 1
+                    move(player, 'RIGHT')
 
                 if event.key == pygame.K_RIGHT:
-                    move(player, 'RIGHT')
+                    delta += 1
+                    move(player, 'LEFT')
+
 
                 if event.key == pygame.K_UP:
                     if not move(player, 'GRAVITY'):
