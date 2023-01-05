@@ -139,20 +139,14 @@ def run():
                     delta -= 1
                     if not move(player, 'RIGHT'):
                         delta += 1
-
-
                 if event.key == pygame.K_RIGHT:
                     print('uuuuu')
                     delta += 1
                     if not move(player, 'LEFT'):
                         delta -= 1
-
-
-
                 if event.key == pygame.K_UP:
                     if not move(player, 'GRAVITY'):
                         move(player, 'UP')
-
                 if event.key == pygame.K_DOWN:
                     move(player, 'DOWN')
 
