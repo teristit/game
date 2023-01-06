@@ -1,6 +1,6 @@
 import os
 import sys
-
+from random import choice
 import pygame
 
 
@@ -16,7 +16,7 @@ def load_level(filename):
 
 
 def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
+    fullname = os.path.join('data\platformerimage', name)
     # если файл не существует, то выходим
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -29,7 +29,8 @@ class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
         self.pos = tile_width * pos_x, tile_height * pos_y
-        self.image = tile_images[tile_type]
+        self.image = choice(tile_images)
+        self.image = pygame.transform.scale(self.image, (tile_width, tile_height))
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(self.pos[0], self.pos[1])
 
@@ -59,11 +60,11 @@ def generate_level(level):
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
-                field.append(Tile('empty', x, y))
+                pass
             elif level[y][x] == '#':
                 field.append(Tile('wall', x, y))
             elif level[y][x] == '@':
-                field.append(Tile('wall', x, y))
+                pass
     # вернем игрока, а также размер поля в клетках
     new_player = Player(10, 5)
     return new_player, field, x, y
@@ -73,22 +74,22 @@ def move(player, vector, takeoff=0):
     x, y = player.pos
     x, y = x, y
     flagh = False
-    if vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 15) // tile_width)] == '.':
+    if vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '.':
         flagh = True
         for i in field:
             i.update(-1)
-    elif vector == 'RIGHT' and level[(y + 39) // tile_width][((x + delta) // tile_width)] == '.':
+    elif vector == 'RIGHT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '.':
         flagh = True
         for i in field:
             i.update(1)
-    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta) // tile_width)] == '.':
+    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 10) // tile_width)] == '.':
         player.update(x, int(y - takeoff))
     elif vector == 'DOWN':
         flag = True
         while flag:
             flag = move(player, 'GRAVITY')
     elif vector == 'GRAVITY':
-        if level[(y - 10) // tile_width + 1][((x + delta) // tile_width)] == '.':
+        if level[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)] == '.':
             player.update(x, y + 1)
             return True
         else:
@@ -113,6 +114,10 @@ tile_images = {
     'wall': load_image('box.png'),
     'empty': load_image('grass.png')
 }
+tile_images = [load_image('obj_stoneblock001.png'), load_image('obj_stoneblock002.png'),
+               load_image('obj_stoneblock003.png'), load_image('obj_stoneblock004.png'),
+               load_image('obj_stoneblock005.png'), load_image('obj_stoneblock006.png'),
+               load_image('obj_stoneblock008.png'), load_image('obj_stoneblock009.png'), ]
 level = load_level('level_1.txt')
 player, field, level_x, level_y = generate_level(level)
 delta = 0
@@ -123,6 +128,8 @@ def run():
     screen = pygame.display.set_mode(size)
     clock = pygame.time.Clock()
     FPS = 150
+    background_image = load_image('background.jpg')
+    background_image = pygame.transform.scale(background_image, (width * 5, height))
     music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
     #    pygame.mixer_music.play()
     global delta
@@ -141,6 +148,7 @@ def run():
 
                     move(player, 'UP', 1)
                 if event.key == pygame.K_DOWN:
+                    takeoff = 0
                     move(player, 'DOWN')
 
         keys = pygame.key.get_pressed()
@@ -156,6 +164,7 @@ def run():
             takeoff -= gravity
         move(player, 'UP', takeoff)
         screen.fill((255, 255, 255))
+        screen.blit(background_image, (-(width * 5 + delta) // 2, 0))
         tiles_group.draw(screen)
         player_group.draw(screen)
         pygame.display.flip()
