@@ -36,6 +36,40 @@ class Turtle(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(self.pos)
 
+    def move(self, x_pos, y_pos):
+        self.pos = x_pos, y_pos
+        self.rect = self.image.get_rect().move(x_pos, y_pos)
+
+    def update(self, turtle, keys):
+        x, y = turtle.pos
+        if keys[pygame.K_LEFT]:
+            # проверка на выход за левые границы
+            if x - 5 >= 0:
+                x -= 5
+            else:
+                x = 0
+        elif keys[pygame.K_RIGHT]:
+            d_width = width - self.image.get_width()
+            # проверка на выход за правые границы
+            if x + 5 <= d_width:
+                x += 5
+            else:
+                x = d_width
+        if keys[pygame.K_DOWN]:
+            d_height = height - self.image.get_height()
+            # проверка на выход за нижние границы
+            if y + 5 <= d_height:
+                y += 5
+            else:
+                y = d_height
+        elif keys[pygame.K_UP]:
+            # проверка на выход за верхние границы
+            if y - 5 >= 0:
+                y -= 5
+            else:
+                y = 0
+        turtle.move(x, y)
+
 
 pygame.init()
 # параментры окна
@@ -69,6 +103,9 @@ while running:
         elif event.type == MYEVENTTYPE:
             time = random.randrange(1000, 10000)
             Jellyfish(jellyfish_group)
+    # получение состояния кнопок
+    keys = pygame.key.get_pressed()
+    turtle.update(turtle, keys)
     screen.blit(background, (0, 0))
     player_group.draw(screen)
     jellyfish_group.draw(screen)
