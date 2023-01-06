@@ -69,28 +69,26 @@ def generate_level(level):
     return new_player, field, x, y
 
 
-def move(player, vector):
+def move(player, vector, takeoff=0):
     x, y = player.pos
     x, y = x, y
     flagh = False
-    if vector == 'LEFT' and level[(y + 39) // tile_width][(x // tile_width + delta)] == '.':
+    if vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 15) // tile_width)] == '.':
         flagh = True
         for i in field:
-            i.update(-50)
-    elif vector == 'RIGHT' and level[(y + 39) // tile_width][(x // tile_width + delta)] == '.':
+            i.update(-1)
+    elif vector == 'RIGHT' and level[(y + 39) // tile_width][((x + delta) // tile_width)] == '.':
         flagh = True
         for i in field:
-            i.update(50)
-    elif vector == 'UP' and level[y // tile_width - 1][(x // tile_width + delta)] == '.':
-        player.update(x, y - 1 * tile_width)
-        if vector == 'UP' and level[y // tile_width - 2][(x // tile_width + delta)] == '.':
-            player.update(x, y - 2 * tile_width - 30)
+            i.update(1)
+    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta) // tile_width)] == '.':
+        player.update(x, int(y - takeoff))
     elif vector == 'DOWN':
         flag = True
         while flag:
             flag = move(player, 'GRAVITY')
     elif vector == 'GRAVITY':
-        if level[(y - 10) // tile_width + 1][(x // tile_width + delta)] == '.':
+        if level[(y - 10) // tile_width + 1][((x + delta) // tile_width)] == '.':
             player.update(x, y + 1)
             return True
         else:
@@ -126,31 +124,37 @@ def run():
     clock = pygame.time.Clock()
     FPS = 150
     music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
-#    pygame.mixer_music.play()
+    #    pygame.mixer_music.play()
     global delta
+    takeoff = 0
+    gravity = 0.09
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    print('aaaa')
-                    delta -= 1
-                    if not move(player, 'RIGHT'):
-                        delta += 1
-                if event.key == pygame.K_RIGHT:
-                    print('uuuuu')
-                    delta += 1
-                    if not move(player, 'LEFT'):
-                        delta -= 1
                 if event.key == pygame.K_UP:
                     if not move(player, 'GRAVITY'):
-                        move(player, 'UP')
+                        takeoff = 5
+                    #                        move(player, 'UP')
+
+                    move(player, 'UP', 1)
                 if event.key == pygame.K_DOWN:
                     move(player, 'DOWN')
 
-        move(player, 'GRAVITY')
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            delta -= 1
+            if not move(player, 'RIGHT'):
+                delta += 1
+        if keys[pygame.K_RIGHT]:
+            delta += 1
+            if not move(player, 'LEFT'):
+                delta -= 1
+        if takeoff > 0:
+            takeoff -= gravity
+        move(player, 'UP', takeoff)
         screen.fill((255, 255, 255))
         tiles_group.draw(screen)
         player_group.draw(screen)
