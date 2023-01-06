@@ -27,6 +27,15 @@ class Jellyfish(pygame.sprite.Sprite):
         self.rect.y -= 1
         self.rect = self.image.get_rect().move(self.rect.x, self.rect.y)
 
+# класс черепахи
+class Turtle(pygame.sprite.Sprite):
+    def __init__(self, *group):
+        super().__init__(player_group, all_sprites)
+        self.pos = width // 2, height // 2
+        self.image = player_image
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect().move(self.pos)
+
 
 pygame.init()
 # параментры окна
@@ -43,7 +52,8 @@ player_image = load_image('turtle.png')
 food_image = load_image('медуза.png')
 background = load_image('sea.jpg')
 clock = pygame.time.Clock()
-
+# переменые классов
+turtle = Turtle()
 jellyfish = Jellyfish()
 # объявление своего события
 MYEVENTTYPE = pygame.USEREVENT + 1
