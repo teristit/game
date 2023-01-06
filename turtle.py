@@ -20,12 +20,14 @@ class Jellyfish(pygame.sprite.Sprite):
         self.image = food_image
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect.x = random.randrange(5, width - 5)
+        self.rect.x = random.randrange(30, width - self.image.get_width() - 30)
         self.rect.y = height
 
     def update(self):
         self.rect.y -= 1
-        self.rect = self.image.get_rect().move(self.rect.x, self.rect.y)
+        if pygame.sprite.collide_mask(self, turtle):
+            self.kill()
+
 
 # класс черепахи
 class Turtle(pygame.sprite.Sprite):
@@ -91,7 +93,7 @@ turtle = Turtle()
 jellyfish = Jellyfish()
 # объявление своего события
 MYEVENTTYPE = pygame.USEREVENT + 1
-time = random.randrange(1000, 10000)
+time = random.randrange(1900, 10000)
 running = True
 # основной цикл
 while running:
@@ -101,7 +103,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == MYEVENTTYPE:
-            time = random.randrange(1000, 10000)
+            time = random.randrange(1900, 10000)
             Jellyfish(jellyfish_group)
     # получение состояния кнопок
     keys = pygame.key.get_pressed()
