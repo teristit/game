@@ -26,6 +26,7 @@
           <option value="main.flask_restful" />
           <option value="main.converterbutton.clicked" />
           <option value="PyQt5.uic" />
+          <option value="platformer.delta" />
         </list>
       </option>
     </inspection_tool>
