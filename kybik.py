@@ -12,15 +12,13 @@ x = 80
 y = display_height / 2 + 140
 width = 40
 height = 80
-JumpCount = 30
-MakeJump = False
 
 font = pygame.font.Font(None, 40)
 score = 0
 above_cactus = False
 
 
-class Cactus:
+class Elka:
     def __init__(self, x, y, width, height, speed):
         self.x = x
         self.y = y
@@ -42,11 +40,11 @@ class Cactus:
 
 
 class Button:
-    def __init__(self, width, height, inactive_sprite, active_sprite, action=False):
+    def __init__(self, width, height, i_sprite, a_sprite, action=False):
         self.width = width
         self.height = height
-        self.inactive_sprite = inactive_sprite
-        self.active_sprite = active_sprite
+        self.i_sprite = i_sprite
+        self.a_sprite = a_sprite
         self.action = action
 
     def draw(self, x, y):
@@ -55,7 +53,7 @@ class Button:
 
         if x < mouse[0] < x + self.width:
             if y < mouse[1] < y + self.height:
-                display.blit(self.active_sprite, (x, y))
+                display.blit(self.a_sprite, (x, y))
 
                 if click[0] == 1:
                     if self.action is not None:
@@ -64,25 +62,23 @@ class Button:
                     pygame.time.delay(300)
 
             else:
-                display.blit(self.inactive_sprite, (x, y))
+                display.blit(self.i_sprite, (x, y))
                 self.action = False
 
         else:
-            display.blit(self.inactive_sprite, (x, y))
+            display.blit(self.i_sprite, (x, y))
             self.action = False
-
-
-Cactus_width = 20
-CactusHeight = 90
-CatusX = display_width - 30
-CactusY = display_height / 2 + 140
+Elka_width = 20
+Elka_height = 90
+ElkaX = display_width - 30
+ElkaY = display_height / 2 + 140
 
 clock = pygame.time.Clock()
 
 
 def Main():
     global MakeJump, score
-    CactusArr = []
+    Elkas = []
     score = 0
 
     working = True
@@ -91,23 +87,17 @@ def Main():
             if event.type == pygame.QUIT:
                 pygame.quit()
 
-        if ceck_collision(CactusArr):
-            working = False
-            game_over()
-            break
 
         mouse_click = pygame.mouse.get_pressed()
         scoreText = font.render("твои балы за ОГЭ " + str(score), 1, (0, 0, 0))
 
-        count_scores(CactusArr)
+        scores(Elkas)
 
-        if mouse_click[0]:
-            MakeJump = True
 
         display.fill((255, 255, 255))
         pygame.draw.rect(display, (255, 0, 0), (x, y, width, height))
         pygame.draw.rect(display, (0, 255, 0), (0, display_height - 80, display_width, 80))
-        draw_cactus(CactusArr)
+        elka(Elkas)
         display.blit(scoreText, (0, 0))
         pygame.display.update()
         clock.tick(80)
@@ -115,13 +105,13 @@ def Main():
 
 
 
-def draw_cactus(array):
+def elka(array):
     for cactus in array:
         check = cactus.draw()
 
 
 
-def ceck_collision(barriers):
+def collision(barriers):
     global x, width
 
     for barrier in barriers:
@@ -134,7 +124,7 @@ def ceck_collision(barriers):
     return False
 
 
-def count_scores(barriers):
+def scores(barriers):
     global score, above_cactus
 
     if not above_cactus:
@@ -144,7 +134,6 @@ def count_scores(barriers):
                     above_cactus = True
                     break
     else:
-        if JumpCount == -28:
             score += 1
             above_cactus = False
 
@@ -176,8 +165,8 @@ def game_over():
         display.fill((0, 255, 255))
         display.blit(info, (display_width / 2 - 80, 20))
 
-        restart_button.draw(display_width / 2 - restart_button.width, display_height / 2 - restart_button.height)
-        menu_button.draw(display_width / 2 - restart_button.width, display_height / 2 - restart_button.height + 40)
+        restart_button.draw(display_width / 1 - restart_button.width, display_height / 2 - restart_button.height)
+        menu_button.draw(display_width / 2 - restart_button.width, display_height / 3 - restart_button.height + 40)
 
         pygame.display.update()
         clock.tick(60)
