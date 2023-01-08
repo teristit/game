@@ -24,10 +24,12 @@ class Jellyfish(pygame.sprite.Sprite):
         self.rect.y = height
 
     def update(self):
+        global count
         self.rect.y -= 1
-        if pygame.sprite.collide_mask(self, turtle):
-            self.kill()
-
+        for i in jellyfish_group:
+            if pygame.sprite.collide_mask(self, turtle):
+                count += 1
+                self.kill()
 
 # класс черепахи
 class Turtle(pygame.sprite.Sprite):
@@ -45,21 +47,24 @@ class Turtle(pygame.sprite.Sprite):
     def update(self, turtle, keys):
         x, y = turtle.pos
         if keys[pygame.K_LEFT]:
+            self.image = player_image
             # проверка на выход за левые границы
             if x - 5 >= 0:
                 x -= 5
             else:
                 x = 0
         elif keys[pygame.K_RIGHT]:
-            d_width = width - self.image.get_width()
+            # поворот изображения
+            self.image = pygame.transform.flip(player_image, player_image.get_width(), 0)
             # проверка на выход за правые границы
+            d_width = width - self.image.get_width()
             if x + 5 <= d_width:
                 x += 5
             else:
                 x = d_width
         if keys[pygame.K_DOWN]:
-            d_height = height - self.image.get_height()
             # проверка на выход за нижние границы
+            d_height = height - self.image.get_height()
             if y + 5 <= d_height:
                 y += 5
             else:
@@ -72,6 +77,11 @@ class Turtle(pygame.sprite.Sprite):
                 y = 0
         turtle.move(x, y)
 
+# функция отрисовки счета
+def draw_count():
+    font = pygame.font.Font(None, 50)
+    title = font.render(str(count), True, (100, 255, 100))
+    screen.blit(title, (0, 0))
 
 pygame.init()
 # параментры окна
@@ -88,6 +98,8 @@ player_image = load_image('turtle.png')
 food_image = load_image('медуза.png')
 background = load_image('sea.jpg')
 clock = pygame.time.Clock()
+# переменная счетчик
+count = 0
 # переменые классов
 turtle = Turtle()
 jellyfish = Jellyfish()
@@ -108,10 +120,11 @@ while running:
     # получение состояния кнопок
     keys = pygame.key.get_pressed()
     turtle.update(turtle, keys)
-    screen.blit(background, (0, 0))
-    player_group.draw(screen)
-    jellyfish_group.draw(screen)
     jellyfish_group.update()
+    screen.blit(background, (0, 0))
+    draw_count()
+    jellyfish_group.draw(screen)
+    player_group.draw(screen)
     pygame.display.flip()
     clock.tick(60)
 pygame.quit()
