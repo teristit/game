@@ -3,6 +3,7 @@ import sys
 import pygame
 import random
 
+
 # функция проверки файла на его наличие
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -12,6 +13,7 @@ def load_image(name, colorkey=None):
         sys.exit()
     image = pygame.image.load(fullname)
     return image
+
 
 # класс маленькой рыбы
 class SmallFish(pygame.sprite.Sprite):
@@ -35,6 +37,37 @@ class SmallFish(pygame.sprite.Sprite):
                 count += 1
                 change()
             break
+
+
+# класс других рыб
+class OtherFish(pygame.sprite.Sprite):
+    def __init__(self, *group):
+        super().__init__(other_fish_group, all_sprites)
+        image = random.choice(list(other_fish_images.values()))
+        delta = random.randrange(100, 200)
+        self.image = image
+        self.image = pygame.transform.scale(self.image, (delta + 10, delta))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.x = width
+        self.rect.y = random.randrange(0, height - self.image.get_height())
+
+    def update(self):
+        self.rect.x -= 1
+        global count
+        for i in other_fish_group:
+            if pygame.sprite.collide_mask(self, player):
+                # если игрок больше, то после столкновения другая рыбка исчезает
+                # счет прибавляется
+                if im_w > self.image.get_width() and im.get_height() > self.image.get_height():
+                    self.kill()
+                    count += 1
+                    change()
+                # иначе исчезает игрок
+                else:
+                    player.kill()
+            break
+
 
 # класс игрока
 class Player(pygame.sprite.Sprite):
@@ -90,11 +123,13 @@ class Player(pygame.sprite.Sprite):
                 y = 0
         player.move(x, y)
 
+
 # функция отрисовки счета
 def draw_count():
     font = pygame.font.Font(None, 50)
     title = font.render('score:' + ' ' + str(count), True, (0, 0, 0), (66, 170, 255))
     screen.blit(title, (0, 0))
+
 
 def change():
     if count == 5:
@@ -110,12 +145,19 @@ size = width, height
 screen = pygame.display.set_mode(size)
 # группы спрайтов
 all_sprites = pygame.sprite.Group()
+other_fish_group = pygame.sprite.Group()
 small_fish_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 # загруска изображений
 player_image = load_image('blue_fish.png')
 food_image = load_image('small_fish.png')
 background = load_image('sea.jpg')
+other_fish_images = {
+    'gold_fish': load_image('gold_fish.png'),
+    'whale': load_image('whale.png'),
+    'small_fish': load_image('small_fish2.png'),
+    'turtle': load_image('turtle.png')
+    }
 im = player_image
 im_w = player_image.get_width()
 im_mask = pygame.mask.from_surface(im)
@@ -123,6 +165,7 @@ clock = pygame.time.Clock()
 # переменная счетчик
 count = 0
 # переменые классов
+other_fish = OtherFish()
 player = Player()
 small_fish = SmallFish()
 # объявление своего события
@@ -137,14 +180,17 @@ while running:
             running = False
         elif event.type == MYEVENTTYPE:
             SmallFish(small_fish_group)
+            OtherFish(other_fish_group)
     im = pygame.transform.scale(player_image, (im_w, im_w))
     im_mask = pygame.mask.from_surface(im)
     # получение состояния кнопок
     keys = pygame.key.get_pressed()
     player.update(player, keys)
+    other_fish_group.update()
     small_fish_group.update()
     screen.blit(background, (0, 0))
     draw_count()
+    other_fish_group.draw(screen)
     small_fish_group.draw(screen)
     player_group.draw(screen)
     pygame.display.flip()
