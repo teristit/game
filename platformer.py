@@ -41,18 +41,20 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(self.pos[0], self.pos[1])
 
     def update(self, d):
+        self.pos = self.pos[0] + d, self.pos[1]
+        self.rect = self.image.get_rect().move(self.pos[0], self.pos[1])
+
+    def animation(self):
         if self.tile_type == 2:
             self.image = fire_images[(fire_images.index(self.image) + 1) % len(fire_images)]
         self.mask = pygame.mask.from_surface(self.image)
-        self.pos = self.pos[0] + d, self.pos[1]
-        self.rect = self.image.get_rect().move(self.pos[0], self.pos[1])
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.pos = tile_width * pos_x + 15, tile_height * pos_y + 10
-        self.image = player_image
+        self.image = player_image[0]
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
@@ -61,6 +63,10 @@ class Player(pygame.sprite.Sprite):
         pos_x, pos_y = x, y
         self.pos = pos_x, pos_y
         self.rect = self.image.get_rect().move(pos_x, pos_y)
+
+    def animation(self):
+        self.image = player_image[(player_image.index(self.image) + 1) % len(player_image)]
+        self.mask = pygame.mask.from_surface(self.image)
 
 
 def generate_level(level):
@@ -83,22 +89,22 @@ def move(player, vector, takeoff=0):
     x, y = player.pos
     x, y = x, y
     flagh = False
-    if vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '.':
+    if vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] in '.@':
         flagh = True
         for i in field:
             i.update(-speed)
-    elif vector == 'RIGHT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '.':
+    elif vector == 'RIGHT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] in '.@':
         flagh = True
         for i in field:
             i.update(speed)
-    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 10) // tile_width)] == '.':
+    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 10) // tile_width)] in '.@':
         player.update(x, int(y - takeoff))
     elif vector == 'DOWN':
         flag = True
         while flag:
             flag = move(player, 'GRAVITY')
     elif vector == 'GRAVITY':
-        if level[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)] == '.':
+        if level[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)] in '.@':
             player.update(x, y + 1)
             return True
         else:
@@ -119,6 +125,7 @@ tile_width = 50
 tile_height = 50
 tiles = []
 player_image = load_image('mar.png')
+player_image = [load_image('player\\frame-1.png', 1), load_image('player\\frame-2.png', 1)]
 tile_images = [load_image('obj_stoneblock001.png', 1), load_image('obj_stoneblock002.png', 1),
                load_image('obj_stoneblock003.png', 1), load_image('obj_stoneblock004.png', 1),
                load_image('obj_stoneblock005.png', 1), load_image('obj_stoneblock006.png', 1),
@@ -166,7 +173,7 @@ def run():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     if not move(player, 'GRAVITY'):
-                        takeoff = 5
+                        takeoff = 4.8
                     #                        move(player, 'UP')
 
                     move(player, 'UP', 1)
@@ -185,6 +192,11 @@ def run():
                 delta -= speed
         if takeoff > 0:
             takeoff -= gravity
+
+        for i in field:
+            i.animation()
+
+        player.animation()
         move(player, 'UP', takeoff)
         screen.fill((255, 255, 255))
         screen.blit(background_image, (-(width * 5 + delta) // 2, 0))
