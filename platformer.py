@@ -54,18 +54,34 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.pos = tile_width * pos_x + 15, tile_height * pos_y + 10
-        self.image = player_image[0]
+        self.player_images = player_image
+        self.image = self.player_images[0]
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
+        self.tile_type = 'IDLE'
 
     def update(self, x, y):
         pos_x, pos_y = x, y
         self.pos = pos_x, pos_y
         self.rect = self.image.get_rect().move(pos_x, pos_y)
 
-    def animation(self):
-        self.image = player_image[(player_image.index(self.image) + 1) % len(player_image)]
+    def animation(self, tile_type=None):
+        if tile_type:
+            self.tile_type = tile_type
+        index = self.player_images.index(self.image)
+        print(self.tile_type)
+        if self.tile_type == 'LEFT':
+            self.player_images = player_walk
+        elif tile_type == 'RIGHT':
+            pass
+        elif tile_type == 'UP':
+            pass
+        elif tile_type == 'DOWN':
+            pass
+        elif self.tile_type == 'IDLE':
+            self.player_images = player_idle
+        self.image = self.player_images[(index + 1) % len(self.player_images)]
         self.mask = pygame.mask.from_surface(self.image)
 
 
@@ -90,6 +106,7 @@ def move(player, vector, takeoff=0):
     x, y = x, y
     flagh = False
     if vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] in '.@':
+
         flagh = True
         for i in field:
             i.update(-speed)
@@ -124,7 +141,18 @@ player_group = pygame.sprite.Group()
 tile_width = 50
 tile_height = 50
 tiles = []
-player_image = load_image('mar.png')
+player_idle = [load_image('idle\\idle 1.png', 1), load_image('idle\\idle 2.png', 1),
+               load_image('idle\\idle 3.png', 1), load_image('idle\\idle 4.png', 1),
+               load_image('idle\\idle 5.png', 1), load_image('idle\\idle 6.png', 1),
+               load_image('idle\\idle 7.png', 1), load_image('idle\\idle 8.png', 1),
+               load_image('idle\\idle 9.png', 1), load_image('idle\\idle 10.png', 1)]
+
+player_walk = [load_image('walk\\walk 2 (1).png', 1), load_image('walk\\walk 2 (2).png', 1),
+               load_image('walk\\walk 2 (3).png', 1), load_image('walk\\walk 2 (4).png', 1),
+               load_image('walk\\walk 2 (5).png', 1), load_image('walk\\walk 2 (6).png', 1),
+               load_image('walk\\walk 2 (7).png', 1), load_image('walk\\walk 2 (8).png', 1),
+               load_image('walk\\walk 2 (9).png', 1), load_image('walk\\walk 2 (10).png', 1)]
+
 player_image = [load_image('player\\frame-1.png', 1), load_image('player\\frame-2.png', 1)]
 tile_images = [load_image('obj_stoneblock001.png', 1), load_image('obj_stoneblock002.png', 1),
                load_image('obj_stoneblock003.png', 1), load_image('obj_stoneblock004.png', 1),
@@ -165,6 +193,8 @@ def run():
     global delta
     takeoff = 0
     gravity = 0.09
+    image_update = 2
+    image_update_counter = 0
 
     while True:
         for event in pygame.event.get():
@@ -184,19 +214,28 @@ def run():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             delta -= speed
+            player.tile_type = 'LEFT'
+            player.animation()
             if not move(player, 'RIGHT'):
                 delta += speed
-        if keys[pygame.K_RIGHT]:
+        elif keys[pygame.K_RIGHT]:
             delta += speed
             if not move(player, 'LEFT'):
                 delta -= speed
+        else:
+            if player.tile_type != 'IDLE':
+                player.tile_type = 'IDLE'
+                player.animation()
         if takeoff > 0:
             takeoff -= gravity
 
         for i in field:
             i.animation()
 
-        player.animation()
+        if image_update_counter // image_update == 1:
+            image_update_counter = 0
+            player.animation()
+        image_update_counter += 1
         move(player, 'UP', takeoff)
         screen.fill((255, 255, 255))
         screen.blit(background_image, (-(width * 5 + delta) // 2, 0))
