@@ -15,6 +15,96 @@ def load_image(name, colorkey=None):
     return image
 
 
+class Cursor(pygame.sprite.Sprite):
+    def __init__(self, *group):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
+        # Это очень важно!!!
+        super().__init__(cursor_group, all_sprites)
+        self.image = cursor_image
+        self.rect = self.image.get_rect()
+
+
+    def position(self, mouse_pos):
+        self.rect.x, self.rect.y = mouse_pos
+
+
+class Start(pygame.sprite.Sprite):
+    def __init__(self, *group):
+        super().__init__(button_group, all_sprites)
+        self.image = button_image
+        self.image = pygame.transform.scale(self.image, (280, 120))
+        self.button_width = self.image.get_width()
+        # self.image = pygame.transform.flip(self.image, self.button_width, 0)
+        # self.image = pygame.transform.rotate(self.image, 340)
+        self.rect = self.image.get_rect()
+        self.button_width = self.image.get_width()
+        self.button_height = self.image.get_height()
+        self.rect.x = (width - self.button_width) // 2 - 35
+        self.rect.y = (height - self.button_height) // 2 + 250
+
+    def open(self, screen):
+        running = True
+        # основной цикл
+        while running:
+            # цикл обработки событий
+            for event in pygame.event.get():
+                screen.blit(fon_image, (0, 0))
+                button_group.draw(screen)
+                button_group.update()
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = event.pos
+                    start.get_click(mouse_pos)
+                elif event.type == pygame.MOUSEMOTION:
+                    pygame.mouse.set_visible(False)
+                    pygame.mouse.get_focused()
+                    cursor_group.draw(screen)
+                    cursor.position(event.pos)
+            im = pygame.transform.scale(player_image, (im_w, im_w))
+            im_mask = pygame.mask.from_surface(im)
+            pygame.display.flip()
+            clock.tick(60)
+        pygame.quit()
+
+    # функция обработки клика
+    def get_click(self, mouse_pos):
+        x, y = mouse_pos
+        # проверка на нажатие кнопки
+        if (self.rect.x <= x <= self.rect.x + self.button_width and
+                self.rect.y <= y <= self.rect.y + self.button_height):
+            game.open(screen)
+
+
+class Game:
+    def open(self, screen):
+        running = True
+        # основной цикл
+        while running:
+
+            # цикл обработки событий
+            for event in pygame.event.get():
+                pygame.time.set_timer(MYEVENTTYPE, 1900)
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == MYEVENTTYPE:
+                    SmallFish(small_fish_group)
+                    OtherFish(other_fish_group)
+            # получение состояния кнопок
+            keys = pygame.key.get_pressed()
+            player.update(player, keys)
+            other_fish_group.update()
+            small_fish_group.update()
+            screen.blit(background, (0, 0))
+            draw_count()
+            other_fish_group.draw(screen)
+            small_fish_group.draw(screen)
+            player_group.draw(screen)
+            pygame.display.flip()
+            clock.tick(60)
+        pygame.quit()
+
+
 # класс маленькой рыбы
 class SmallFish(pygame.sprite.Sprite):
     def __init__(self, *group):
@@ -137,6 +227,40 @@ def change():
     if count == 10:
         player.grow()
 
+
+class GameOver(pygame.sprite.Sprite):
+    # функция обработки клика
+    def get_click(self, mouse_pos):
+        x, y = mouse_pos
+        # проверка на нажатие кнопки
+        if 150 <= x <= 490 and 730 <= y <= 870:
+            print(1)
+        elif 890 <= x <= 1250 and 705 <= y <= 895:
+            print(0)
+
+    def open(self, screen):
+        fon_image = load_image('gameover.png')
+        running = True
+        # основной цикл
+        while running:
+            # цикл обработки событий
+            for event in pygame.event.get():
+                screen.blit(fon_image, (0, 0))
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = event.pos
+                    game_over.get_click(mouse_pos)
+                elif event.type == pygame.MOUSEMOTION:
+                    pygame.mouse.set_visible(False)
+                    pygame.mouse.get_focused()
+                    cursor_group.draw(screen)
+                    cursor.position(event.pos)
+            pygame.display.flip()
+            clock.tick(60)
+        pygame.quit()
+
+
 pygame.init()
 # параментры окна
 width = 1400
@@ -145,6 +269,8 @@ size = width, height
 screen = pygame.display.set_mode(size)
 # группы спрайтов
 all_sprites = pygame.sprite.Group()
+cursor_group = pygame.sprite.Group()
+button_group = pygame.sprite.Group()
 other_fish_group = pygame.sprite.Group()
 small_fish_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -158,6 +284,9 @@ other_fish_images = {
     'small_fish': load_image('small_fish2.png'),
     'turtle': load_image('turtle.png')
     }
+fon_image = load_image('fon.png')
+button_image = load_image('start.webp')
+cursor_image = load_image("arrow.png")
 im = player_image
 im_w = player_image.get_width()
 im_mask = pygame.mask.from_surface(im)
@@ -168,31 +297,10 @@ count = 0
 other_fish = OtherFish()
 player = Player()
 small_fish = SmallFish()
+start = Start()
+cursor = Cursor()
+game = Game()
+game_over = GameOver()
 # объявление своего события
 MYEVENTTYPE = pygame.USEREVENT + 1
-running = True
-# основной цикл
-while running:
-    # цикл обработки событий
-    for event in pygame.event.get():
-        pygame.time.set_timer(MYEVENTTYPE, 1900)
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == MYEVENTTYPE:
-            SmallFish(small_fish_group)
-            OtherFish(other_fish_group)
-    im = pygame.transform.scale(player_image, (im_w, im_w))
-    im_mask = pygame.mask.from_surface(im)
-    # получение состояния кнопок
-    keys = pygame.key.get_pressed()
-    player.update(player, keys)
-    other_fish_group.update()
-    small_fish_group.update()
-    screen.blit(background, (0, 0))
-    draw_count()
-    other_fish_group.draw(screen)
-    small_fish_group.draw(screen)
-    player_group.draw(screen)
-    pygame.display.flip()
-    clock.tick(60)
-pygame.quit()
+start.open(screen)
