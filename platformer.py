@@ -23,8 +23,11 @@ def load_image(name, type=0):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
     image = pygame.image.load(fullname)
-    if type:
+    if type == 1:
         image = pygame.transform.scale(image, (tile_width, tile_height))
+    elif type == 2:
+        image = pygame.transform.scale(image, (tile_width, tile_height))
+        image = pygame.transform.flip(image, True, False)
     return image
 
 
@@ -70,11 +73,11 @@ class Player(pygame.sprite.Sprite):
         if tile_type:
             self.tile_type = tile_type
         index = self.player_images.index(self.image)
-        print(self.tile_type)
+
         if self.tile_type == 'LEFT':
-            self.player_images = player_walk
-        elif tile_type == 'RIGHT':
-            pass
+            self.player_images = player_walk_left
+        elif self.tile_type == 'RIGHT':
+            self.player_images = player_walk_right
         elif tile_type == 'UP':
             pass
         elif tile_type == 'DOWN':
@@ -141,17 +144,28 @@ player_group = pygame.sprite.Group()
 tile_width = 50
 tile_height = 50
 tiles = []
-player_idle = [load_image('idle\\idle 1.png', 1), load_image('idle\\idle 2.png', 1),
-               load_image('idle\\idle 3.png', 1), load_image('idle\\idle 4.png', 1),
-               load_image('idle\\idle 5.png', 1), load_image('idle\\idle 6.png', 1),
-               load_image('idle\\idle 7.png', 1), load_image('idle\\idle 8.png', 1),
-               load_image('idle\\idle 9.png', 1), load_image('idle\\idle 10.png', 1)]
+player_idle_left = [load_image('idle\\idle 1.png', 1), load_image('idle\\idle 2.png', 1),
+                    load_image('idle\\idle 3.png', 1), load_image('idle\\idle 4.png', 1),
+                    load_image('idle\\idle 5.png', 1), load_image('idle\\idle 6.png', 1),
+                    load_image('idle\\idle 7.png', 1), load_image('idle\\idle 8.png', 1),
+                    load_image('idle\\idle 9.png', 1), load_image('idle\\idle 10.png', 1)]
+player_idle_right = [load_image('idle\\idle 1.png', 1), load_image('idle\\idle 2.png', 1),
+                     load_image('idle\\idle 3.png', 1), load_image('idle\\idle 4.png', 1),
+                     load_image('idle\\idle 5.png', 1), load_image('idle\\idle 6.png', 1),
+                     load_image('idle\\idle 7.png', 1), load_image('idle\\idle 8.png', 1),
+                     load_image('idle\\idle 9.png', 1), load_image('idle\\idle 10.png', 1)]
 
-player_walk = [load_image('walk\\walk 2 (1).png', 1), load_image('walk\\walk 2 (2).png', 1),
-               load_image('walk\\walk 2 (3).png', 1), load_image('walk\\walk 2 (4).png', 1),
-               load_image('walk\\walk 2 (5).png', 1), load_image('walk\\walk 2 (6).png', 1),
-               load_image('walk\\walk 2 (7).png', 1), load_image('walk\\walk 2 (8).png', 1),
-               load_image('walk\\walk 2 (9).png', 1), load_image('walk\\walk 2 (10).png', 1)]
+player_walk_left = [load_image('walk\\walk 2 (1).png', 2), load_image('walk\\walk 2 (2).png', 2),
+                    load_image('walk\\walk 2 (3).png', 2), load_image('walk\\walk 2 (4).png', 2),
+                    load_image('walk\\walk 2 (5).png', 2), load_image('walk\\walk 2 (6).png', 2),
+                    load_image('walk\\walk 2 (7).png', 2), load_image('walk\\walk 2 (8).png', 2),
+                    load_image('walk\\walk 2 (9).png', 2), load_image('walk\\walk 2 (10).png', 2)]
+
+player_walk_right = [load_image('walk\\walk 2 (1).png', 1), load_image('walk\\walk 2 (2).png', 1),
+                     load_image('walk\\walk 2 (3).png', 1), load_image('walk\\walk 2 (4).png', 1),
+                     load_image('walk\\walk 2 (5).png', 1), load_image('walk\\walk 2 (6).png', 1),
+                     load_image('walk\\walk 2 (7).png', 1), load_image('walk\\walk 2 (8).png', 1),
+                     load_image('walk\\walk 2 (9).png', 1), load_image('walk\\walk 2 (10).png', 1)]
 
 player_image = [load_image('player\\frame-1.png', 1), load_image('player\\frame-2.png', 1)]
 tile_images = [load_image('obj_stoneblock001.png', 1), load_image('obj_stoneblock002.png', 1),
@@ -214,12 +228,14 @@ def run():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             delta -= speed
-            player.tile_type = 'LEFT'
+            player.tile_type = 'RIGHT'
             player.animation()
             if not move(player, 'RIGHT'):
                 delta += speed
         elif keys[pygame.K_RIGHT]:
             delta += speed
+            player.tile_type = 'LEFT'
+            player.animation()
             if not move(player, 'LEFT'):
                 delta -= speed
         else:
