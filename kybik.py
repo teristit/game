@@ -12,10 +12,12 @@ x = 80
 y = display_height / 2 + 140
 width = 40
 height = 80
+JumpCount = 30
+MakeJump = False
 
 font = pygame.font.Font(None, 40)
 score = 0
-above_cactus = False
+above_elka = False
 
 
 class Elka:
@@ -68,6 +70,8 @@ class Button:
         else:
             display.blit(self.i_sprite, (x, y))
             self.action = False
+
+
 Elka_width = 20
 Elka_height = 90
 ElkaX = display_width - 30
@@ -79,6 +83,7 @@ clock = pygame.time.Clock()
 def Main():
     global MakeJump, score
     Elkas = []
+    elkas(Elkas)
     score = 0
 
     working = True
@@ -87,28 +92,50 @@ def Main():
             if event.type == pygame.QUIT:
                 pygame.quit()
 
+        if collision(Elkas):
+            working = False
+            game_over()
+            break
 
         mouse_click = pygame.mouse.get_pressed()
-        scoreText = font.render("твои балы за ОГЭ " + str(score), 1, (0, 0, 0))
+        scoreText = font.render("Твои балы за ОГЭ: " + str(score), 1, (0, 0, 0))
 
         scores(Elkas)
 
+        if mouse_click[0]:
+            MakeJump = True
 
+        if MakeJump:
+            Jump()
         display.fill((255, 255, 255))
         pygame.draw.rect(display, (255, 0, 0), (x, y, width, height))
         pygame.draw.rect(display, (0, 255, 0), (0, display_height - 80, display_width, 80))
-        elka(Elkas)
+        draw_cactus(Elkas)
         display.blit(scoreText, (0, 0))
         pygame.display.update()
         clock.tick(80)
 
 
+def Jump():
+    global y, JumpCount, MakeJump
+
+    if JumpCount >= -28:
+        JumpCount -= 1
+        y -= JumpCount / 2
+    else:
+        JumpCount = 30
+        MakeJump = False
+
+
+def elkas(array):
+    array.append(Elka(display_width - 50, display_height / 2 + 130, 20, 90, 4))
+    array.append(Elka(display_width + 300, display_height / 2 + 140, 20, 90, 4))
+    array.append(Elka(display_width + 600, display_height / 2 + 160, 20, 90, 4))
 
 
 def elka(array):
     for cactus in array:
         check = cactus.draw()
-
 
 
 def collision(barriers):
@@ -125,17 +152,46 @@ def collision(barriers):
 
 
 def scores(barriers):
-    global score, above_cactus
+    global score, above_elka
 
-    if not above_cactus:
+    if not above_elka:
         for barrier in barriers:
             if barrier.x <= x + width / 2 <= barrier.x + barrier.width:
                 if y + height - 5 <= barrier.y:
-                    above_cactus = True
+                    above_elka = True
                     break
     else:
+        if JumpCount == -28:
             score += 1
-            above_cactus = False
+            above_elka = False
+
+
+def find_radius(array):
+    maximum = max(array[0].x, array[1].x, array[2].x)
+
+    if maximum <= display_width:
+        radius = display_width
+        if radius - maximum < 50:
+            radius += 350
+    else:
+        radius = maximum
+
+    choice = random.randrange(0, 5)
+    if choice == 0:
+        radius += random.randrange(10, 15)
+    else:
+        radius += random.randrange(200, 250)
+
+    return radius
+
+
+def draw_cactus(array):
+    for cactus in array:
+        check = cactus.draw()
+
+        if not check:
+            radius = find_radius(array)
+            cactus.return_self(radius)
 
 
 def game_over():
