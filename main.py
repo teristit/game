@@ -22,5 +22,4 @@ class Main:
         self.game = 0
         self.run()
 
-
 Main()
