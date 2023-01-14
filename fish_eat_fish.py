@@ -1,7 +1,7 @@
 import os
-import sys
 import pygame
 import random
+import sys
 
 
 # функция проверки файла на его наличие
@@ -23,7 +23,6 @@ class Cursor(pygame.sprite.Sprite):
         self.image = cursor_image
         self.rect = self.image.get_rect()
 
-
     def position(self, mouse_pos):
         self.rect.x, self.rect.y = mouse_pos
 
@@ -41,7 +40,6 @@ class Start(pygame.sprite.Sprite):
         self.button_height = self.image.get_height()
         self.rect.x = (width - self.button_width) // 2 - 35
         self.rect.y = (height - self.button_height) // 2 + 250
-
 
     # функция обработки клика
     def get_click(self, mouse_pos):
@@ -237,44 +235,49 @@ def terminate():
     pygame.quit()
     sys.exit()
 
-pygame.init()
-# параментры окна
-width = 1400
-height = 950
-size = width, height
-# группы спрайтов
-all_sprites = pygame.sprite.Group()
-cursor_group = pygame.sprite.Group()
-button_group = pygame.sprite.Group()
-other_fish_group = pygame.sprite.Group()
-small_fish_group = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
-# загруска изображений
-player_image = load_image('blue_fish.png')
-food_image = load_image('small_fish.png')
-background = load_image('sea.jpg')
-other_fish_images = {
-    'gold_fish': load_image('gold_fish.png'),
-    'whale': load_image('whale.png'),
-    'small_fish': load_image('small_fish2.png'),
-    'turtle': load_image('turtle.png')
-    }
-fon_image = load_image('fon.png')
-button_image = load_image('start.webp')
-cursor_image = load_image("arrow.png")
-im = player_image
-im_w = player_image.get_width()
-im_mask = pygame.mask.from_surface(im)
-clock = pygame.time.Clock()
-# переменная счетчик
-count = 0
-# переменые классов
-# объявление своего события
-MYEVENTTYPE = pygame.USEREVENT + 1
 
 
 def run():
-    global game, screen, player
+    global game, screen, player, other_fish_group, small_fish_group
+    global all_sprites, player_group, food_image , background, other_fish_images
+    global width, height, im, im_mask, button_image, cursor_image
+    global count, MYEVENTTYPE, button_group, cursor_group, clock
+    global im_w, im_mask
+    pygame.init()
+    # параментры окна
+    width = 1400
+    height = 950
+    size = width, height
+    # группы спрайтов
+    all_sprites = pygame.sprite.Group()
+    cursor_group = pygame.sprite.Group()
+    button_group = pygame.sprite.Group()
+    other_fish_group = pygame.sprite.Group()
+    small_fish_group = pygame.sprite.Group()
+    player_group = pygame.sprite.Group()
+    # загруска изображений
+    player_image = load_image('blue_fish.png')
+    food_image = load_image('small_fish.png')
+    background = load_image('sea.jpg')
+    other_fish_images = {
+        'gold_fish': load_image('gold_fish.png'),
+        'whale': load_image('whale.png'),
+        'small_fish': load_image('small_fish2.png'),
+        'turtle': load_image('turtle.png')
+    }
+    fon_image = load_image('fon.png')
+    button_image = load_image('start.webp')
+    cursor_image = load_image("arrow.png")
+    im = player_image
+    im_w = player_image.get_width()
+    im_mask = pygame.mask.from_surface(im)
+    clock = pygame.time.Clock()
+    # переменная счетчик
+    count = 0
+    # переменые классов
+    # объявление своего события
+    MYEVENTTYPE = pygame.USEREVENT + 1
+
     screen = pygame.display.set_mode(size)
     other_fish = OtherFish()
     player = Player()

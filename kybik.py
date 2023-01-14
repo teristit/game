@@ -216,7 +216,7 @@ def game_over():
 
         if menu_button.action == True:
             working = False
-            Menu()
+            pygame.quit()
 
         display.fill((0, 255, 255))
         display.blit(info, (display_width / 2 - 80, 20))

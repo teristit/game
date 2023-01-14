@@ -1,8 +1,7 @@
 import os
+import pygame
 import sys
 from random import choice
-
-import pygame
 
 
 def load_level(filename):
@@ -17,6 +16,7 @@ def load_level(filename):
 
 
 def load_image(name, type=0):
+    print(tile_width)
     fullname = os.path.join('data\platformerimage', name)
     # если файл не существует, то выходим
     if not os.path.isfile(fullname):
@@ -206,72 +206,87 @@ def terminate():
     sys.exit()
 
 
-size = width, height = 1500, 800
-all_sprites = pygame.sprite.Group()
-tiles_group = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
-tile_width = 50
-tile_height = 50
-tiles = []
-player_idle_left = [load_image('idle\\idle 1.png', 2), load_image('idle\\idle 2.png', 2),
-                    load_image('idle\\idle 3.png', 2), load_image('idle\\idle 4.png', 2),
-                    load_image('idle\\idle 5.png', 2), load_image('idle\\idle 6.png', 2),
-                    load_image('idle\\idle 7.png', 2), load_image('idle\\idle 8.png', 2),
-                    load_image('idle\\idle 9.png', 2), load_image('idle\\idle 10.png', 2)]
-
-player_idle_right = [load_image('idle\\idle 1.png', 1), load_image('idle\\idle 2.png', 1),
-                     load_image('idle\\idle 3.png', 1), load_image('idle\\idle 4.png', 1),
-                     load_image('idle\\idle 5.png', 1), load_image('idle\\idle 6.png', 1),
-                     load_image('idle\\idle 7.png', 1), load_image('idle\\idle 8.png', 1),
-                     load_image('idle\\idle 9.png', 1), load_image('idle\\idle 10.png', 1)]
-
-player_walk_left = [load_image('walk\\walk 2 (1).png', 2), load_image('walk\\walk 2 (2).png', 2),
-                    load_image('walk\\walk 2 (3).png', 2), load_image('walk\\walk 2 (4).png', 2),
-                    load_image('walk\\walk 2 (5).png', 2), load_image('walk\\walk 2 (6).png', 2),
-                    load_image('walk\\walk 2 (7).png', 2), load_image('walk\\walk 2 (8).png', 2),
-                    load_image('walk\\walk 2 (9).png', 2), load_image('walk\\walk 2 (10).png', 2)]
-
-player_walk_right = [load_image('walk\\walk 2 (1).png', 1), load_image('walk\\walk 2 (2).png', 1),
-                     load_image('walk\\walk 2 (3).png', 1), load_image('walk\\walk 2 (4).png', 1),
-                     load_image('walk\\walk 2 (5).png', 1), load_image('walk\\walk 2 (6).png', 1),
-                     load_image('walk\\walk 2 (7).png', 1), load_image('walk\\walk 2 (8).png', 1),
-                     load_image('walk\\walk 2 (9).png', 1), load_image('walk\\walk 2 (10).png', 1)]
-
-player_image = [load_image('player\\frame-1.png', 1), load_image('player\\frame-2.png', 1)]
-
-tile_images = [load_image('obj_stoneblock001.png', 1), load_image('obj_stoneblock002.png', 1),
-               load_image('obj_stoneblock003.png', 1), load_image('obj_stoneblock004.png', 1),
-               load_image('obj_stoneblock005.png', 1), load_image('obj_stoneblock006.png', 1),
-               load_image('obj_stoneblock008.png', 1), load_image('obj_stoneblock009.png', 1)]
-fire_images = [load_image('0001.png', 1), load_image('0002.png', 1), load_image('0003.png', 1),
-               load_image('0004.png', 1), load_image('0005.png', 1), load_image('0006.png', 1),
-               load_image('0007.png', 1), load_image('0008.png', 1), load_image('0009.png', 1),
-               load_image('0010.png', 1), load_image('0011.png', 1), load_image('0012.png', 1),
-               load_image('0013.png', 1), load_image('0014.png', 1), load_image('0015.png', 1),
-               load_image('0016.png', 1), load_image('0017.png', 1), load_image('0018.png', 1),
-               load_image('0019.png', 1), load_image('0020.png', 1), load_image('0021.png', 1),
-               load_image('0022.png', 1), load_image('0023.png', 1), load_image('0024.png', 1),
-               load_image('0025.png', 1), load_image('0026.png', 1), load_image('0027.png', 1),
-               load_image('0028.png', 1), load_image('0029.png', 1), load_image('0030.png', 1),
-               load_image('0031.png', 1), load_image('0032.png', 1), load_image('0033.png', 1),
-               load_image('0034.png', 1), load_image('0035.png', 1), load_image('0036.png', 1),
-               load_image('0037.png', 1), load_image('0038.png', 1), load_image('0039.png', 1),
-               load_image('0040.png', 1), load_image('0041.png', 1), load_image('0042.png', 1),
-               load_image('0043.png', 1), load_image('0044.png', 1), load_image('0045.png', 1),
-               load_image('0046.png', 1), load_image('0047.png', 1), load_image('0048.png', 1),
-               load_image('0049.png', 1), load_image('0050.png', 1)]
-foe_image = [load_image('foe\\idle.png', 1)]
-santa_image = [load_image('santa\\Head.png', 1), load_image('santa\\Head2.png', 1)]
-level = load_level('level_1.txt')
-player, field, level_x, level_y = generate_level(level)
-delta = 0
-speed = 5
-score = 0
-crutchscore = 0
-
-
 def run():
+    global foe_image
+    global santa_image
+    global level
+    global delta
+    global score
+    global crutchscore
+    global player
+    global field
+    global level_x
+    global level_y
+    global speed
+    global tile_width
+    global tile_height
+    global tiles_group
+    global all_sprites
+    global tile_images, fire_images, player_group, player_image
+    global player_idle_right, player_walk_right, player_walk_left, player_idle_left
+    size = width, height = 1500, 800
+    all_sprites = pygame.sprite.Group()
+    tiles_group = pygame.sprite.Group()
+    player_group = pygame.sprite.Group()
+    tile_width = 50
+    tile_height = 50
+    tiles = []
+    foe_image = [load_image('foe\\idle.png', 1)]
+    santa_image = [load_image('santa\\Head.png', 1), load_image('santa\\Head2.png', 1)]
+    level = load_level('level_1.txt')
+    delta = 0
+    speed = 5
+    score = 0
+    crutchscore = 0
     pygame.init()
+    player_idle_left = [load_image('idle\\idle 1.png', 2), load_image('idle\\idle 2.png', 2),
+                        load_image('idle\\idle 3.png', 2), load_image('idle\\idle 4.png', 2),
+                        load_image('idle\\idle 5.png', 2), load_image('idle\\idle 6.png', 2),
+                        load_image('idle\\idle 7.png', 2), load_image('idle\\idle 8.png', 2),
+                        load_image('idle\\idle 9.png', 2), load_image('idle\\idle 10.png', 2)]
+
+    player_idle_right = [load_image('idle\\idle 1.png', 1), load_image('idle\\idle 2.png', 1),
+                         load_image('idle\\idle 3.png', 1), load_image('idle\\idle 4.png', 1),
+                         load_image('idle\\idle 5.png', 1), load_image('idle\\idle 6.png', 1),
+                         load_image('idle\\idle 7.png', 1), load_image('idle\\idle 8.png', 1),
+                         load_image('idle\\idle 9.png', 1), load_image('idle\\idle 10.png', 1)]
+
+    player_walk_left = [load_image('walk\\walk 2 (1).png', 2), load_image('walk\\walk 2 (2).png', 2),
+                        load_image('walk\\walk 2 (3).png', 2), load_image('walk\\walk 2 (4).png', 2),
+                        load_image('walk\\walk 2 (5).png', 2), load_image('walk\\walk 2 (6).png', 2),
+                        load_image('walk\\walk 2 (7).png', 2), load_image('walk\\walk 2 (8).png', 2),
+                        load_image('walk\\walk 2 (9).png', 2), load_image('walk\\walk 2 (10).png', 2)]
+
+    player_walk_right = [load_image('walk\\walk 2 (1).png', 1), load_image('walk\\walk 2 (2).png', 1),
+                         load_image('walk\\walk 2 (3).png', 1), load_image('walk\\walk 2 (4).png', 1),
+                         load_image('walk\\walk 2 (5).png', 1), load_image('walk\\walk 2 (6).png', 1),
+                         load_image('walk\\walk 2 (7).png', 1), load_image('walk\\walk 2 (8).png', 1),
+                         load_image('walk\\walk 2 (9).png', 1), load_image('walk\\walk 2 (10).png', 1)]
+
+    player_image = [load_image('player\\frame-1.png', 1), load_image('player\\frame-2.png', 1)]
+
+    tile_images = [load_image('obj_stoneblock001.png', 1), load_image('obj_stoneblock002.png', 1),
+                   load_image('obj_stoneblock003.png', 1), load_image('obj_stoneblock004.png', 1),
+                   load_image('obj_stoneblock005.png', 1), load_image('obj_stoneblock006.png', 1),
+                   load_image('obj_stoneblock008.png', 1), load_image('obj_stoneblock009.png', 1)]
+    fire_images = [load_image('0001.png', 1), load_image('0002.png', 1), load_image('0003.png', 1),
+                   load_image('0004.png', 1), load_image('0005.png', 1), load_image('0006.png', 1),
+                   load_image('0007.png', 1), load_image('0008.png', 1), load_image('0009.png', 1),
+                   load_image('0010.png', 1), load_image('0011.png', 1), load_image('0012.png', 1),
+                   load_image('0013.png', 1), load_image('0014.png', 1), load_image('0015.png', 1),
+                   load_image('0016.png', 1), load_image('0017.png', 1), load_image('0018.png', 1),
+                   load_image('0019.png', 1), load_image('0020.png', 1), load_image('0021.png', 1),
+                   load_image('0022.png', 1), load_image('0023.png', 1), load_image('0024.png', 1),
+                   load_image('0025.png', 1), load_image('0026.png', 1), load_image('0027.png', 1),
+                   load_image('0028.png', 1), load_image('0029.png', 1), load_image('0030.png', 1),
+                   load_image('0031.png', 1), load_image('0032.png', 1), load_image('0033.png', 1),
+                   load_image('0034.png', 1), load_image('0035.png', 1), load_image('0036.png', 1),
+                   load_image('0037.png', 1), load_image('0038.png', 1), load_image('0039.png', 1),
+                   load_image('0040.png', 1), load_image('0041.png', 1), load_image('0042.png', 1),
+                   load_image('0043.png', 1), load_image('0044.png', 1), load_image('0045.png', 1),
+                   load_image('0046.png', 1), load_image('0047.png', 1), load_image('0048.png', 1),
+                   load_image('0049.png', 1), load_image('0050.png', 1)]
+    player, field, level_x, level_y = generate_level(level)
     screen = pygame.display.set_mode(size)
     clock = pygame.time.Clock()
     FPS = 100
@@ -279,19 +294,17 @@ def run():
     background_image = pygame.transform.scale(background_image, (width * 5, height))
     music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
     #    pygame.mixer_music.play()
-    global delta
-    global score
-    global crutchscore
     takeoff = 0
     gravity = 0.09
     image_update = 30
     image_update_counter = 0
     crutch = 0
+    runGame = True
 
-    while True:
+    while runGame:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                terminate()
+                runGame = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     if not move(player, 'GRAVITY'):
