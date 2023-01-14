@@ -232,6 +232,7 @@ class GameOver(pygame.sprite.Sprite):
             pygame.display.flip()
             clock.tick(60)
 
+
 def terminate():
     pygame.quit()
     sys.exit()
@@ -278,24 +279,29 @@ game = Game()
 game_over = GameOver()
 # объявление своего события
 MYEVENTTYPE = pygame.USEREVENT + 1
-# основной цикл
-while True:
-    # цикл обработки событий
-    for event in pygame.event.get():
-        screen.blit(fon_image, (0, 0))
-        button_group.draw(screen)
-        button_group.update()
-        if event.type == pygame.QUIT:
-            terminate()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_pos = event.pos
-            start.get_click(mouse_pos)
-        elif event.type == pygame.MOUSEMOTION:
-            pygame.mouse.set_visible(False)
-            pygame.mouse.get_focused()
-            cursor_group.draw(screen)
-            cursor.position(event.pos)
-    im = pygame.transform.scale(player_image, (im_w, im_w))
-    im_mask = pygame.mask.from_surface(im)
-    pygame.display.flip()
-    clock.tick(60)
+
+
+def run():
+    # основной цикл
+    while True:
+        # цикл обработки событий
+        for event in pygame.event.get():
+            screen.blit(fon_image, (0, 0))
+            button_group.draw(screen)
+            button_group.update()
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = event.pos
+                start.get_click(mouse_pos)
+            elif event.type == pygame.MOUSEMOTION:
+                pygame.mouse.set_visible(False)
+                pygame.mouse.get_focused()
+                cursor_group.draw(screen)
+                cursor.position(event.pos)
+        im = pygame.transform.scale(player_image, (im_w, im_w))
+        im_mask = pygame.mask.from_surface(im)
+        pygame.display.flip()
+        clock.tick(60)
+
+run()
