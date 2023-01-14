@@ -138,12 +138,12 @@ def generate_level(level):
 
 
 def move(player, vector, takeoff=0):
-    global score
+    global crutchscore
     global field
     x, y = player.pos
     x, y = x, y
     flagh = False
-    if vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '.':
+    if vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 30) // tile_width)] == '.':
 
         flagh = True
         for i in field:
@@ -156,7 +156,7 @@ def move(player, vector, takeoff=0):
             for j in i:
                 if j:
                     j.update(speed)
-    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 10) // tile_width)] == '.':
+    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 15) // tile_width)] == '.':
         player.update(x, int(y - takeoff))
     elif vector == 'DOWN':
         flag = True
@@ -166,13 +166,19 @@ def move(player, vector, takeoff=0):
         if level[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)] == '.':
             player.update(x, y + 1)
             return True
+        elif level[(y - 10) // tile_width + 1][((x + delta + 15) // tile_width)] == '@':
+            level[(y - 10) // tile_width + 1][((x + delta + 15) // tile_width)] = '.'
+            field[(y - 10) // tile_width + 1][((x + delta + 15) // tile_width)].delete()
+            player.update(x, y + 1)
+            crutchscore += 1
+            return True
         else:
             return False
 
-    elif vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '@':
-        level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '.'
-        field[(y + 39) // tile_width][((x + delta + 10) // tile_width)].delete()
-        score += 1
+    elif vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 30) // tile_width)] == '@':
+        level[(y + 39) // tile_width][((x + delta + 30) // tile_width)] == '.'
+        field[(y + 39) // tile_width][((x + delta + 30) // tile_width)].delete()
+        crutchscore += 1
         flagh = True
         for i in field:
             for j in i:
@@ -181,30 +187,17 @@ def move(player, vector, takeoff=0):
     elif vector == 'RIGHT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '@':
         level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] = '.'
         field[(y + 39) // tile_width][((x + delta + 10) // tile_width)].delete()
-        score += 1
+        crutchscore += 1
         flagh = True
         for i in field:
             for j in i:
                 if j:
                     j.update(speed)
-    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 10) // tile_width)] == '@':
-        level[(y - 2) // tile_width][((x + delta + 10) // tile_width)] = '.'
-        field[(y - 2) // tile_width][((x + delta + 10) // tile_width)].delete()
-        score += 1
+    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 15) // tile_width)] == '@':
+        level[(y - 2) // tile_width][((x + delta + 15) // tile_width)] = '.'
+        field[(y - 2) // tile_width][((x + delta + 15) // tile_width)].delete()
+        crutchscore += 1
         player.update(x, int(y - takeoff))
-    elif vector == 'DOWN':
-        flag = True
-        while flag:
-            flag = move(player, 'GRAVITY')
-    elif vector == 'GRAVITY':
-        if level[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)] == '@':
-            level[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)] = '.'
-            field[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)].delete()
-            player.update(x, y + 1)
-            score += 1
-            return True
-        else:
-            return False
     return flagh
 
 
@@ -274,6 +267,7 @@ player, field, level_x, level_y = generate_level(level)
 delta = 0
 speed = 5
 score = 0
+crutchscore = 0
 
 
 def run():
@@ -286,10 +280,13 @@ def run():
     music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
     #    pygame.mixer_music.play()
     global delta
+    global score
+    global crutchscore
     takeoff = 0
     gravity = 0.09
     image_update = 30
     image_update_counter = 0
+    crutch = 0
 
     while True:
         for event in pygame.event.get():
@@ -326,6 +323,13 @@ def run():
                 if j:
                     j.animation()
 
+        if score != crutchscore and crutch == 0:
+            score = crutchscore
+            crutch = 50
+        elif score != crutchscore:
+            crutchscore = score
+        if crutch != 0:
+            crutch -= 1
         print(score, '####')
         if image_update_counter // image_update == 1:
             image_update_counter = 0
