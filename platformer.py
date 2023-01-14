@@ -62,7 +62,7 @@ class Player(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
-        self.tile_type = 'IDLE'
+        self.tile_type = 'IDLER'
 
     def update(self, x, y):
         pos_x, pos_y = x, y
@@ -70,7 +70,15 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(pos_x, pos_y)
 
     def animation(self, tile_type=None):
-        if tile_type:
+        if tile_type == 'IDLE' and self.tile_type == 'RIGHT':
+            self.tile_type = 'IDLER'
+        elif tile_type == 'IDLE' and self.tile_type == 'LEFT':
+            self.tile_type = 'IDLEL'
+        elif tile_type == 'IDLE' and self.tile_type == 'IDLER':
+            self.tile_type = 'IDLER'
+        elif tile_type == 'IDLE' and self.tile_type == 'IDLEL':
+            self.tile_type = 'IDLEL'
+        elif tile_type:
             self.tile_type = tile_type
         index = self.player_images.index(self.image)
 
@@ -82,8 +90,10 @@ class Player(pygame.sprite.Sprite):
             pass
         elif tile_type == 'DOWN':
             pass
-        elif self.tile_type == 'IDLE':
-            self.player_images = player_idle
+        elif self.tile_type == 'IDLER':
+            self.player_images = player_idle_right
+        elif self.tile_type == 'IDLEL':
+            self.player_images = player_idle_left
         self.image = self.player_images[(index + 1) % len(self.player_images)]
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -144,11 +154,12 @@ player_group = pygame.sprite.Group()
 tile_width = 50
 tile_height = 50
 tiles = []
-player_idle_left = [load_image('idle\\idle 1.png', 1), load_image('idle\\idle 2.png', 1),
-                    load_image('idle\\idle 3.png', 1), load_image('idle\\idle 4.png', 1),
-                    load_image('idle\\idle 5.png', 1), load_image('idle\\idle 6.png', 1),
-                    load_image('idle\\idle 7.png', 1), load_image('idle\\idle 8.png', 1),
-                    load_image('idle\\idle 9.png', 1), load_image('idle\\idle 10.png', 1)]
+player_idle_left = [load_image('idle\\idle 1.png', 2), load_image('idle\\idle 2.png', 2),
+                    load_image('idle\\idle 3.png', 2), load_image('idle\\idle 4.png', 2),
+                    load_image('idle\\idle 5.png', 2), load_image('idle\\idle 6.png', 2),
+                    load_image('idle\\idle 7.png', 2), load_image('idle\\idle 8.png', 2),
+                    load_image('idle\\idle 9.png', 2), load_image('idle\\idle 10.png', 2)]
+
 player_idle_right = [load_image('idle\\idle 1.png', 1), load_image('idle\\idle 2.png', 1),
                      load_image('idle\\idle 3.png', 1), load_image('idle\\idle 4.png', 1),
                      load_image('idle\\idle 5.png', 1), load_image('idle\\idle 6.png', 1),
@@ -192,14 +203,14 @@ fire_images = [load_image('0001.png', 1), load_image('0002.png', 1), load_image(
 level = load_level('level_1.txt')
 player, field, level_x, level_y = generate_level(level)
 delta = 0
-speed = 2
+speed = 5
 
 
 def run():
     pygame.init()
     screen = pygame.display.set_mode(size)
     clock = pygame.time.Clock()
-    FPS = 150
+    FPS = 100
     background_image = load_image('background.jpg')
     background_image = pygame.transform.scale(background_image, (width * 5, height))
     music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
@@ -207,7 +218,7 @@ def run():
     global delta
     takeoff = 0
     gravity = 0.09
-    image_update = 2
+    image_update = 30
     image_update_counter = 0
 
     while True:
@@ -228,20 +239,17 @@ def run():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             delta -= speed
-            player.tile_type = 'RIGHT'
-            player.animation()
+            player.animation('RIGHT')
             if not move(player, 'RIGHT'):
                 delta += speed
         elif keys[pygame.K_RIGHT]:
             delta += speed
-            player.tile_type = 'LEFT'
-            player.animation()
+            player.animation('LEFT')
             if not move(player, 'LEFT'):
                 delta -= speed
         else:
             if player.tile_type != 'IDLE':
-                player.tile_type = 'IDLE'
-                player.animation()
+                player.animation('IDLE')
         if takeoff > 0:
             takeoff -= gravity
 
