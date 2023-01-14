@@ -9,7 +9,7 @@ def load_level(filename):
     filename = "levels/" + filename
     # читаем уровень, убирая символы перевода строки
     with open(filename, 'r') as mapFile:
-        level_map = [line.strip() for line in mapFile]
+        level_map = [list(line) for line in mapFile]
 
     # и подсчитываем максимальную длину
     max_width = max(map(len, level_map))
@@ -29,6 +29,23 @@ def load_image(name, type=0):
         image = pygame.transform.scale(image, (tile_width, tile_height))
         image = pygame.transform.flip(image, True, False)
     return image
+
+
+class Foe(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(player_group, all_sprites)
+        self.pos = tile_width * pos_x + 15, tile_height * pos_y + 10
+        self.player_images = player_image
+        self.image = self.player_images[0]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x, tile_height * pos_y)
+        self.tile_type = 'IDLER'
+
+    def update(self, x, y):
+        pos_x, pos_y = x, y
+        self.pos = pos_x, pos_y
+        self.rect = self.image.get_rect().move(pos_x, pos_y)
 
 
 class Tile(pygame.sprite.Sprite):
@@ -51,6 +68,10 @@ class Tile(pygame.sprite.Sprite):
         if self.tile_type == 2:
             self.image = fire_images[(fire_images.index(self.image) + 1) % len(fire_images)]
         self.mask = pygame.mask.from_surface(self.image)
+
+    def delete(self):
+        self.image = santa_image[0]
+        self.tile_type = 3
 
 
 class Player(pygame.sprite.Sprite):
@@ -102,40 +123,85 @@ def generate_level(level):
     new_player, x, y = None, None, None
     field = []
     for y in range(len(level)):
+        fiel = []
         for x in range(len(level[y])):
             if level[y][x] == '.':
-                pass
+                fiel.append(None)
             elif level[y][x] == '#':
-                field.append(Tile(1, x, y))
+                fiel.append(Tile(1, x, y))
             elif level[y][x] == '@':
-                field.append(Tile(2, x, y))
+                fiel.append(Tile(2, x, y))
+        field.append(fiel)
     # вернем игрока, а также размер поля в клетках
     new_player = Player(10, 5)
     return new_player, field, x, y
 
 
 def move(player, vector, takeoff=0):
+    global score
+    global field
     x, y = player.pos
     x, y = x, y
     flagh = False
-    if vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] in '.@':
+    if vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '.':
 
         flagh = True
         for i in field:
-            i.update(-speed)
-    elif vector == 'RIGHT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] in '.@':
+            for j in i:
+                if j:
+                    j.update(-speed)
+    elif vector == 'RIGHT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '.':
         flagh = True
         for i in field:
-            i.update(speed)
-    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 10) // tile_width)] in '.@':
+            for j in i:
+                if j:
+                    j.update(speed)
+    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 10) // tile_width)] == '.':
         player.update(x, int(y - takeoff))
     elif vector == 'DOWN':
         flag = True
         while flag:
             flag = move(player, 'GRAVITY')
     elif vector == 'GRAVITY':
-        if level[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)] in '.@':
+        if level[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)] == '.':
             player.update(x, y + 1)
+            return True
+        else:
+            return False
+
+    elif vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '@':
+        level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '.'
+        field[(y + 39) // tile_width][((x + delta + 10) // tile_width)].delete()
+        score += 1
+        flagh = True
+        for i in field:
+            for j in i:
+                if j:
+                    j.update(-speed)
+    elif vector == 'RIGHT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '@':
+        level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] = '.'
+        field[(y + 39) // tile_width][((x + delta + 10) // tile_width)].delete()
+        score += 1
+        flagh = True
+        for i in field:
+            for j in i:
+                if j:
+                    j.update(speed)
+    elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 10) // tile_width)] == '@':
+        level[(y - 2) // tile_width][((x + delta + 10) // tile_width)] = '.'
+        field[(y - 2) // tile_width][((x + delta + 10) // tile_width)].delete()
+        score += 1
+        player.update(x, int(y - takeoff))
+    elif vector == 'DOWN':
+        flag = True
+        while flag:
+            flag = move(player, 'GRAVITY')
+    elif vector == 'GRAVITY':
+        if level[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)] == '@':
+            level[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)] = '.'
+            field[(y - 10) // tile_width + 1][((x + delta + 10) // tile_width)].delete()
+            player.update(x, y + 1)
+            score += 1
             return True
         else:
             return False
@@ -179,6 +245,7 @@ player_walk_right = [load_image('walk\\walk 2 (1).png', 1), load_image('walk\\wa
                      load_image('walk\\walk 2 (9).png', 1), load_image('walk\\walk 2 (10).png', 1)]
 
 player_image = [load_image('player\\frame-1.png', 1), load_image('player\\frame-2.png', 1)]
+
 tile_images = [load_image('obj_stoneblock001.png', 1), load_image('obj_stoneblock002.png', 1),
                load_image('obj_stoneblock003.png', 1), load_image('obj_stoneblock004.png', 1),
                load_image('obj_stoneblock005.png', 1), load_image('obj_stoneblock006.png', 1),
@@ -200,10 +267,13 @@ fire_images = [load_image('0001.png', 1), load_image('0002.png', 1), load_image(
                load_image('0043.png', 1), load_image('0044.png', 1), load_image('0045.png', 1),
                load_image('0046.png', 1), load_image('0047.png', 1), load_image('0048.png', 1),
                load_image('0049.png', 1), load_image('0050.png', 1)]
+foe_image = [load_image('foe\\idle.png', 1)]
+santa_image = [load_image('santa\\Head.png', 1), load_image('santa\\Head2.png', 1)]
 level = load_level('level_1.txt')
 player, field, level_x, level_y = generate_level(level)
 delta = 0
 speed = 5
+score = 0
 
 
 def run():
@@ -235,7 +305,6 @@ def run():
                 if event.key == pygame.K_DOWN:
                     takeoff = 0
                     move(player, 'DOWN')
-
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             delta -= speed
@@ -252,10 +321,12 @@ def run():
                 player.animation('IDLE')
         if takeoff > 0:
             takeoff -= gravity
-
         for i in field:
-            i.animation()
+            for j in i:
+                if j:
+                    j.animation()
 
+        print(score, '####')
         if image_update_counter // image_update == 1:
             image_update_counter = 0
             player.animation()
