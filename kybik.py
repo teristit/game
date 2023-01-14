@@ -256,4 +256,3 @@ def Menu():
         clock.tick(60)
 
 
-Menu()

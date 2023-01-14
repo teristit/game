@@ -242,7 +242,6 @@ pygame.init()
 width = 1400
 height = 950
 size = width, height
-screen = pygame.display.set_mode(size)
 # группы спрайтов
 all_sprites = pygame.sprite.Group()
 cursor_group = pygame.sprite.Group()
@@ -270,18 +269,20 @@ clock = pygame.time.Clock()
 # переменная счетчик
 count = 0
 # переменые классов
-other_fish = OtherFish()
-player = Player()
-small_fish = SmallFish()
-start = Start()
-cursor = Cursor()
-game = Game()
-game_over = GameOver()
 # объявление своего события
 MYEVENTTYPE = pygame.USEREVENT + 1
 
 
 def run():
+    global game, screen, player
+    screen = pygame.display.set_mode(size)
+    other_fish = OtherFish()
+    player = Player()
+    small_fish = SmallFish()
+    start = Start()
+    cursor = Cursor()
+    game = Game()
+    game_over = GameOver()
     # основной цикл
     while True:
         # цикл обработки событий
@@ -303,5 +304,3 @@ def run():
         im_mask = pygame.mask.from_surface(im)
         pygame.display.flip()
         clock.tick(60)
-
-run()
