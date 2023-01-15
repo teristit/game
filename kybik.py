@@ -1,6 +1,5 @@
-import random
-
 import pygame
+import random
 
 pygame.init()
 display_width = 1000
@@ -194,7 +193,7 @@ def draw_cactus(array):
             cactus.return_self(radius)
 
 
-def game_over():
+def game_over(line=None):
     working = True
     restart_button = Button(100, 50, pygame.image.load("data/restart-button-inactive.png"),
                             pygame.image.load("data/restart-button-active.png"))
@@ -205,14 +204,17 @@ def game_over():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-
-        info = font.render("you dead :(", 1, (0, 0, 0))
+        if not line:
+            info = font.render("you dead :(", 1, (0, 0, 0))
+        else:
+            info = font.render(line, 1, (0, 0, 0))
         keys = pygame.key.get_pressed()
 
-        if restart_button.action == True:
-            working = False
-            Main()
-            restart_button.action = False
+        if not line:
+            if restart_button.action == True:
+                working = False
+                Main()
+                restart_button.action = False
 
         if menu_button.action == True:
             working = False
@@ -220,8 +222,9 @@ def game_over():
         display.fill((0, 255, 255))
         display.blit(info, (display_width / 2 - 80, 20))
 
-        restart_button.draw(display_width / 1 - restart_button.width, display_height / 2 - restart_button.height)
-        menu_button.draw(display_width / 2 - restart_button.width, display_height / 3 - restart_button.height + 40)
+        if not line:
+            restart_button.draw(display_width / 1 - restart_button.width, display_height / 2 - restart_button.height)
+        menu_button.draw(display_width / 2 - menu_button.width, display_height / 3 -menu_button.height + 40)
 
         pygame.display.update()
         clock.tick(60)
@@ -253,5 +256,3 @@ def Menu():
 
         pygame.display.update()
         clock.tick(60)
-
-

@@ -3,6 +3,8 @@ import pygame
 import sys
 from random import choice
 
+import kybik
+
 
 def load_level(filename):
     filename = "levels/" + filename
@@ -406,6 +408,9 @@ def run(row):
         if shurikenmoves:
             break
 
+        if score == 4:
+            break
+
         image_update_counter += 1
         move(player, 'UP', takeoff)
         screen.fill((255, 255, 255))
@@ -414,3 +419,7 @@ def run(row):
         player_group.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
+    if score == 4:
+        kybik.game_over('вы выиграли!')
+    else:
+        kybik.game_over('вы проиграли!')
