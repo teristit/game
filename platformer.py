@@ -3,6 +3,8 @@ import pygame
 import sys
 from random import choice
 
+import kybik
+
 
 def load_level(filename):
     filename = "levels/" + filename
@@ -30,21 +32,23 @@ def load_image(name, type=0):
     return image
 
 
-class Foe(pygame.sprite.Sprite):
+class Shuriken(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
-        super().__init__(player_group, all_sprites)
-        self.pos = tile_width * pos_x + 15, tile_height * pos_y + 10
-        self.player_images = player_image
-        self.image = self.player_images[0]
-        self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x, tile_height * pos_y)
-        self.tile_type = 'IDLER'
-
-    def update(self, x, y):
-        pos_x, pos_y = x, y
+        super().__init__(tiles_group, all_sprites)
         self.pos = pos_x, pos_y
-        self.rect = self.image.get_rect().move(pos_x, pos_y)
+        self.image = shuriken_image[0]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect().move(self.pos[0], self.pos[1])
+
+    def update(self, d):
+        self.pos = self.pos[0] + d, self.pos[1]
+        self.rect = self.image.get_rect().move(self.pos[0], self.pos[1])
+
+    def place(self):
+        return [self.pos[0], self.pos[1]]
+
+    def delete(self):
+        self.kill()
 
 
 class Tile(pygame.sprite.Sprite):
@@ -73,7 +77,13 @@ class Tile(pygame.sprite.Sprite):
     def delete(self):
         if self.tile_type == 2:
             self.image = santa_image[0]
-            self.tile_type = 3
+            self.tile_type = 0
+
+    def place(self):
+        return [self.pos[0], self.pos[1]]
+
+    def name(self):
+        return self.tile_type
 
 
 class Player(pygame.sprite.Sprite):
@@ -91,6 +101,9 @@ class Player(pygame.sprite.Sprite):
         pos_x, pos_y = x, y
         self.pos = pos_x, pos_y
         self.rect = self.image.get_rect().move(pos_x, pos_y)
+
+    def place(self):
+        return [self.pos[0], self.pos[1]]
 
     def animation(self, tile_type=None):
         if tile_type == 'IDLE' and self.tile_type == 'RIGHT':
@@ -120,6 +133,9 @@ class Player(pygame.sprite.Sprite):
         self.image = self.player_images[(index + 1) % len(self.player_images)]
         self.mask = pygame.mask.from_surface(self.image)
 
+    def name(self):
+        return 'Player'
+
 
 def generate_level(level):
     new_player, x, y = None, None, None
@@ -148,18 +164,21 @@ def move(player, vector, takeoff=0):
     x, y = x, y
     flagh = False
     if vector == 'LEFT' and level[(y + 39) // tile_width][((x + delta + 30) // tile_width)] == '.':
-
         flagh = True
         for i in field:
             for j in i:
                 if j:
                     j.update(-speed)
+        for i in shurikens:
+            i.update(-speed)
     elif vector == 'RIGHT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '.':
         flagh = True
         for i in field:
             for j in i:
                 if j:
                     j.update(speed)
+        for i in shurikens:
+            i.update(speed)
     elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 15) // tile_width)] == '.':
         player.update(x, int(y - takeoff))
     elif vector == 'DOWN':
@@ -188,6 +207,8 @@ def move(player, vector, takeoff=0):
             for j in i:
                 if j:
                     j.update(-speed)
+        for i in shurikens:
+            i.update(-speed)
     elif vector == 'RIGHT' and level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] == '@':
         level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] = '.'
         field[(y + 39) // tile_width][((x + delta + 10) // tile_width)].delete()
@@ -197,12 +218,33 @@ def move(player, vector, takeoff=0):
             for j in i:
                 if j:
                     j.update(speed)
+        for i in shurikens:
+            i.update(speed)
     elif vector == 'UP' and level[(y - 2) // tile_width][((x + delta + 15) // tile_width)] == '@':
         level[(y - 2) // tile_width][((x + delta + 15) // tile_width)] = '.'
         field[(y - 2) // tile_width][((x + delta + 15) // tile_width)].delete()
         crutchscore += 1
         player.update(x, int(y - takeoff))
     return flagh
+
+
+def shurikenmove():
+    global shurikens
+    newshurikens = []
+    for i in shurikens:
+        x, y = i.place()
+        playerx, playery = player.place()
+        if level[(y + 39) // tile_width][((x + delta + 10) // tile_width)] in '.(':
+            i.update(speed)
+            newshurikens.append(i)
+            if y in range(playery - 10, playery + tile_height + 5):
+                if x in range(playerx - 5, playerx + tile_width + 5):
+                    return True
+        else:
+
+            i.delete()
+    shurikens = newshurikens
+    return False
 
 
 def terminate():
@@ -212,38 +254,28 @@ def terminate():
 
 def run(row):
     print(row)
-    global foe_image
-    global santa_image
-    global level
-    global delta
-    global score
-    global crutchscore
-    global player
-    global field
-    global level_x
-    global level_y
-    global speed
-    global tile_width
-    global tile_height
-    global tiles_group
-    global all_sprites
+    global foe_image, santa_image, level, delta
+    global score, crutchscore
+    global player, field, level_x, level_y, speed
+    global tile_width, tile_height, tiles_group, all_sprites
     global tile_images, fire_images, player_group, player_image
     global player_idle_right, player_walk_right, player_walk_left, player_idle_left
+    global shuriken_image, shurikens
     size = width, height = 1300, 800
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
     tile_width = 50
     tile_height = 50
-    tiles = []
-    foe_image = [load_image('foe\\idle.png', 1)]
-    santa_image = [load_image('santa\\Head.png', 1), load_image('santa\\Head2.png', 1)]
     level = load_level(row)
     delta = 0
     speed = 5
     score = 0
     crutchscore = 0
     pygame.init()
+    foe_image = [load_image('foe\\idle.png', 1)]
+    shuriken_image = [load_image('foe\\shuriken.png', 1)]
+    santa_image = [load_image('santa\\Head.png', 1), load_image('santa\\Head2.png', 1)]
     player_idle_left = [load_image('idle\\idle 1.png', 2), load_image('idle\\idle 2.png', 2),
                         load_image('idle\\idle 3.png', 2), load_image('idle\\idle 4.png', 2),
                         load_image('idle\\idle 5.png', 2), load_image('idle\\idle 6.png', 2),
@@ -304,6 +336,10 @@ def run(row):
     image_update = 30
     image_update_counter = 0
     crutch = 0
+    shurikens = []
+    # количество пропускаемых кадров для запуска сюрикена
+    shurikens_time = 100
+    shurikens_time_counter = 0
     runGame = True
 
     while runGame:
@@ -320,6 +356,7 @@ def run(row):
                 if event.key == pygame.K_DOWN:
                     takeoff = 0
                     move(player, 'DOWN')
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             delta -= speed
@@ -341,17 +378,39 @@ def run(row):
                 if j:
                     j.animation()
 
+        if shurikens_time_counter == shurikens_time:
+            print('!!')
+            shurikens_time_counter = 0
+            for i in field:
+                for j in i:
+                    if j:
+                        if j.name() == 3:
+                            shurikens.append(Shuriken(*j.place()))
+        else:
+            shurikens_time_counter += 1
+
         if score != crutchscore and crutch == 0:
             score = crutchscore
             crutch = 50
         elif score != crutchscore:
             crutchscore = score
+
         if crutch != 0:
             crutch -= 1
-        print(score, '####')
-        if image_update_counter // image_update == 1:
+        #        print(score, '####')
+
+        if image_update_counter == image_update:
             image_update_counter = 0
             player.animation()
+
+        shurikenmoves = shurikenmove()
+        print(shurikenmoves)
+        if shurikenmoves:
+            break
+
+        if score == 4:
+            break
+
         image_update_counter += 1
         move(player, 'UP', takeoff)
         screen.fill((255, 255, 255))
@@ -360,3 +419,7 @@ def run(row):
         player_group.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
+    if score == 4:
+        kybik.game_over('вы выиграли!')
+    else:
+        kybik.game_over('вы проиграли!')
