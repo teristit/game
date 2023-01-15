@@ -53,4 +53,6 @@ class Main:
         level = start_window.run(
             names=['выберите уровень', '    1    ', '    2    ', '    3    ', 'выйти'])
         return level
+
+
 Main()
