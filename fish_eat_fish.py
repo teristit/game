@@ -53,13 +53,15 @@ class Start(pygame.sprite.Sprite):
 class Game:
     def open(self, screen):
         # основной цикл
-        while True:
+        runGame = True
+        while runGame:
 
             # цикл обработки событий
             for event in pygame.event.get():
                 pygame.time.set_timer(MYEVENTTYPE, 1900)
                 if event.type == pygame.QUIT:
-                    terminate()
+                    runGame = False
+#                    terminate()
                 elif event.type == MYEVENTTYPE:
                     SmallFish(small_fish_group)
                     OtherFish(other_fish_group)
@@ -287,14 +289,16 @@ def run():
     game = Game()
     game_over = GameOver()
     # основной цикл
-    while True:
+    runGame = True
+    while runGame:
         # цикл обработки событий
         for event in pygame.event.get():
             screen.blit(fon_image, (0, 0))
             button_group.draw(screen)
             button_group.update()
             if event.type == pygame.QUIT:
-                terminate()
+#                terminate()
+                runGame = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
                 start.get_click(mouse_pos)

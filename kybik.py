@@ -3,7 +3,7 @@ import random
 import pygame
 
 pygame.init()
-display_width = 900
+display_width = 1000
 display_height = 600
 display = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("Ну допустим, недодинозаврик")
@@ -216,7 +216,6 @@ def game_over():
 
         if menu_button.action == True:
             working = False
-            pygame.quit()
 
         display.fill((0, 255, 255))
         display.blit(info, (display_width / 2 - 80, 20))

@@ -1,7 +1,9 @@
-import start_window
-import platformer
-import kybik
+import csv
+
 import fish_eat_fish
+import kybik
+import platformer
+import start_window
 
 
 class Main:
@@ -24,7 +26,16 @@ class Main:
         self.run()
 
     def myplatformer(self):
-        self.game = platformer.run()
+        level = self.levelselection()
+        print(level)
+        if level != 4:
+            with open('levels/level.csv', encoding="utf8") as csvfile:
+                reader = csv.reader(csvfile, delimiter=';', quotechar='"')
+                for index, row in enumerate(reader):
+                    if index > 10:
+                        break
+                    if level == index + 1:
+                        self.game = platformer.run(row[0])
         self.game = 0
         self.run()
 
@@ -38,4 +49,8 @@ class Main:
         self.game = 0
         self.run()
 
+    def levelselection(self):
+        level = start_window.run(
+            names=['выберите уровень', '    1    ', '    2    ', '    3    ', 'выйти'])
+        return level
 Main()

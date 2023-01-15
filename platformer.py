@@ -16,7 +16,6 @@ def load_level(filename):
 
 
 def load_image(name, type=0):
-    print(tile_width)
     fullname = os.path.join('data\platformerimage', name)
     # если файл не существует, то выходим
     if not os.path.isfile(fullname):
@@ -57,6 +56,8 @@ class Tile(pygame.sprite.Sprite):
             self.image = choice(tile_images)
         elif tile_type == 2:
             self.image = fire_images[0]
+        elif tile_type == 3:
+            self.image = foe_image[0]
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(self.pos[0], self.pos[1])
 
@@ -70,8 +71,9 @@ class Tile(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
     def delete(self):
-        self.image = santa_image[0]
-        self.tile_type = 3
+        if self.tile_type == 2:
+            self.image = santa_image[0]
+            self.tile_type = 3
 
 
 class Player(pygame.sprite.Sprite):
@@ -131,6 +133,8 @@ def generate_level(level):
                 fiel.append(Tile(1, x, y))
             elif level[y][x] == '@':
                 fiel.append(Tile(2, x, y))
+            elif level[y][x] == '(':
+                fiel.append(Tile(3, x, y))
         field.append(fiel)
     # вернем игрока, а также размер поля в клетках
     new_player = Player(10, 5)
@@ -206,7 +210,8 @@ def terminate():
     sys.exit()
 
 
-def run():
+def run(row):
+    print(row)
     global foe_image
     global santa_image
     global level
@@ -224,7 +229,7 @@ def run():
     global all_sprites
     global tile_images, fire_images, player_group, player_image
     global player_idle_right, player_walk_right, player_walk_left, player_idle_left
-    size = width, height = 1500, 800
+    size = width, height = 1300, 800
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
@@ -233,7 +238,7 @@ def run():
     tiles = []
     foe_image = [load_image('foe\\idle.png', 1)]
     santa_image = [load_image('santa\\Head.png', 1), load_image('santa\\Head2.png', 1)]
-    level = load_level('level_1.txt')
+    level = load_level(row)
     delta = 0
     speed = 5
     score = 0

@@ -6,6 +6,9 @@ import pygame
 # Начальное окно
 class StartWindow:
     # функция проверки существования загружаемого файла
+    def __init__(self, names):
+        self.names = names
+
     def load_image(self, name, colorkey=None):
         fullname = os.path.join('data', name)
         # если файл не существует, то выходим
@@ -17,7 +20,8 @@ class StartWindow:
 
     # функция прорисовки кнопок
     def draw(self, screen):
-        names = ['TITLE GAME', 'name', 'name', 'name', 'name']
+        names = self.names
+#        names = ['TITLE GAME', 'name1', 'name2', 'name3', 'name4']
         for i in range(len(names)):
             if i == 0:
                 font_size = 100
@@ -51,29 +55,27 @@ class StartWindow:
                 # переход в окно игры 1
                 if i == 1:
                     return 1
-                    print(4)
                 # переход в окно игры 2
                 elif i == 2:
                     return 2
-                    print(3)
-                    sys.exit()
+#                    sys.exit()
                 # переход в окно игры 3
                 elif i == 3:
                     return 3
-                    print(2)
-                else:
-                    print(1)
+                elif i == 4:
+                    return 4
 
 
 size = width, height = 1000, 800
 
 
-def run():
+def run(names=['TITLE GAME', 'game1', 'game2', 'game3', 'exit']):
     pygame.init()
+    pygame.mouse.set_visible(True)
     pygame.display.set_caption('Начальная заставка')
     screen = pygame.display.set_mode(size)
     screen.fill((255, 255, 255))
-    start_window = StartWindow()
+    start_window = StartWindow(names)
     runGame = True
     # игровой цикл
     while runGame:
@@ -81,6 +83,7 @@ def run():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 runGame = False
+                return 4
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
                 n = start_window.get_click(mouse_pos)
