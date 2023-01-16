@@ -330,7 +330,7 @@ def run(row):
     background_image = load_image('background.jpg')
     background_image = pygame.transform.scale(background_image, (width * 5, height))
     music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
-    #    pygame.mixer_music.play()
+    pygame.mixer_music.play(-1)
     takeoff = 0
     gravity = 0.09
     image_update = 30

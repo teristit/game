@@ -36,7 +36,7 @@ class StartWindow:
             screen.blit(title, (text_x, text_y))
             if i != 0:
                 pygame.draw.rect(screen, (0, 255, 0), (text_x - 10, text_y - 10,
-                                                       text_w + 20, text_h + 20), 1)
+                                                       text_w + 20, text_h + 20), 5)
 
     # функция обработки клика
     def get_click(self, mouse_pos):
